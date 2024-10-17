@@ -259,8 +259,8 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
           return AlertDialog(
             title: Text('Image Preview'),
             content: SizedBox(
-              width: double.maxFinite, // Set width to accommodate images
-              height: 400, // Set a fixed height for the scrollable area
+              width: double.maxFinite,
+              height: 400,
               child: Column(
                 children: [
                   Expanded(
@@ -278,8 +278,8 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 10), // Space between images and text
-                  Text('Do you want to add more photos?'), // Static text
+                  SizedBox(height: 10),
+                  Text('Do you want to add more photos?'),
                 ],
               ),
             ),
@@ -288,15 +288,15 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
                 child: Text('Add More'),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  keepAdding = true; // Continue adding images
+                  keepAdding = true;
                 },
               ),
               TextButton(
                 child: Text('Done'),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  keepAdding = false; // Stop adding images
-                  // Update button color to green
+                  keepAdding = false;
+
                   setState(() {
                     _buttonColors[buttonText] = Colors.green;
                   });
@@ -315,7 +315,7 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
 
       if (pickedFile != null) {
         File imageFile = File(pickedFile.path);
-        // Only add the image to the list, do not change the button color here
+
         setState(() {
           _capturedPhotos[buttonText]!.add(imageFile);
         });
