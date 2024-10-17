@@ -22,24 +22,17 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
   static const double spacing = 30;
 
   final ImagePicker _picker = ImagePicker();
-  final Map<String, File?> _capturedPhotos = {};
+  final Map<String, List<File>> _capturedPhotos = {}; // Store lists of images
   final Map<String, Color> _buttonColors = {};
   final List<String> _allButtonLabels = [
-    'Front Photo',
-    'Left side\nPhoto',
+    'Accident Photos',
     'Front NIC Photo',
-    'License Photo',
-    'Deletion Letter',
+    'License Photo Front',
+    'License Photo Back',
     'Meter Reader',
-    'Left Front\nCorner',
-    'Left Back\nCorner',
-    'Back Photo',
-    'Right side\nPhoto',
     'Back NIC Photo',
     'Vehicle Book\nPhoto',
     'Chassi Number',
-    'Right Front\nCorner',
-    'Right Back\nCorner',
     'Wind Screen\nLabel',
   ];
 
@@ -50,12 +43,12 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
     super.initState();
     for (var label in _allButtonLabels) {
       _buttonColors[label] = Colors.white;
-      _capturedPhotos[label] = null;
+      _capturedPhotos[label] = []; // Initialize with empty lists
     }
   }
 
   bool get allImagesCaptured =>
-      _capturedPhotos.values.every((file) => file != null) &&
+      _capturedPhotos.values.every((files) => files.isNotEmpty) &&
       _buttonColors.values.every((color) => color != Colors.red);
 
   @override
@@ -94,7 +87,7 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
                     Padding(
                       padding: const EdgeInsets.only(top: 30.0),
                       child: Text(
-                        'Register Your Vehicle',
+                        'Inspect Your Vehicle',
                         style: TextStyle(
                           shadows: [
                             Shadow(
@@ -119,45 +112,29 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
                         children: [
                           _buildColumnWithButtons(
                             [
-                              'Front Photo',
-                              'Left side\nPhoto',
+                              'Accident Photos',
                               'Front NIC Photo',
-                              'License Photo',
-                              'Deletion Letter',
+                              'License Photo Front',
                               'Meter Reader',
-                              'Left Front\nCorner',
-                              'Left Back\nCorner',
                             ],
                             [
-                              () => _openCamera('Front Photo'),
-                              () => _openCamera('Left side\nPhoto'),
+                              () => _openCamera('Accident Photos'),
                               () => _openCamera('Front NIC Photo'),
-                              () => _openCamera('License Photo'),
-                              () => _openCamera('Deletion Letter'),
+                              () => _openCamera('License Photo Front'),
                               () => _openCamera('Meter Reader'),
-                              () => _openCamera('Left Front\nCorner'),
-                              () => _openCamera('Left Back\nCorner'),
                             ],
                           ),
                           _buildColumnWithButtons(
                             [
-                              'Back Photo',
-                              'Right side\nPhoto',
-                              'Back NIC Photo',
-                              'Vehicle Book\nPhoto',
                               'Chassi Number',
-                              'Right Front\nCorner',
-                              'Right Back\nCorner',
+                              'Back NIC Photo',
+                              'License Photo Back',
                               'Wind Screen\nLabel',
                             ],
                             [
-                              () => _openCamera('Back Photo'),
-                              () => _openCamera('Right side\nPhoto'),
-                              () => _openCamera('Back NIC Photo'),
-                              () => _openCamera('Vehicle Book\nPhoto'),
                               () => _openCamera('Chassi Number'),
-                              () => _openCamera('Right Front\nCorner'),
-                              () => _openCamera('Right Back\nCorner'),
+                              () => _openCamera('Back NIC Photo'),
+                              () => _openCamera('License Photo Back'),
                               () => _openCamera('Wind Screen\nLabel'),
                             ],
                           ),
@@ -207,11 +184,11 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
   }
 
   Column _buildColumnWithButtons(
-      List<String> buttonTexts, List<VoidCallback?> onPressedFunctions) {
+      List<String> buttonTexts, List<VoidCallback> onPressedFunctions) {
     List<Widget> buttonsWithSpacing = [];
     for (int i = 0; i < buttonTexts.length; i++) {
       buttonsWithSpacing.add(
-        _buildElevatedButton(buttonTexts[i], null), // Disable the button
+        _buildElevatedButton(buttonTexts[i], onPressedFunctions[i]),
       );
       if (i < buttonTexts.length - 1) {
         buttonsWithSpacing.add(SizedBox(height: spacing));
@@ -222,24 +199,16 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
         children: buttonsWithSpacing);
   }
 
-  ElevatedButton _buildElevatedButton(String text, VoidCallback? onPressed) {
+  ElevatedButton _buildElevatedButton(String text, VoidCallback onPressed) {
     final Map<String, String> buttonImages = {
-      'Front Photo': 'assets/front1.png',
-      'Left side\nPhoto': 'assets/left.png',
+      'Accident Photos': 'assets/front1.png',
       'Front NIC Photo': 'assets/ID.png',
-      'License Photo': 'assets/lis.png',
-      'Back Photo': 'assets/back.png',
-      'Right side\nPhoto': 'assets/right.png',
+      'License Photo Front': 'assets/lis.png',
+      'License Photo Back': 'assets/lis.png',
       'Back NIC Photo': 'assets/IDback.png',
-      'Vehicle Book\nPhoto': 'assets/book.png',
-      'Deletion Letter': 'assets/letter.png',
       'Chassi Number': 'assets/chassi.png',
       'Meter Reader': 'assets/meter.png',
       'Wind Screen\nLabel': 'assets/wind.png',
-      'Left Back\nCorner': 'assets/back_Left.png',
-      'Right Back\nCorner': 'assets/back_Right.png',
-      'Right Front\nCorner': 'assets/front_Right.png',
-      'Left Front\nCorner': 'assets/front_Left.png',
     };
 
     return ElevatedButton(
@@ -253,7 +222,7 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
         elevation: 10,
         shadowColor: Color.fromARGB(255, 0, 0, 0),
       ),
-      onPressed: null, // Disable button
+      onPressed: onPressed,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -279,45 +248,64 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
   }
 
   Future<void> _openCamera(String buttonText) async {
-    if (_capturedPhotos[buttonText] != null) {
+    bool keepAdding = true;
+
+    while (keepAdding) {
+      await _captureNewImage(buttonText);
+
       await showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Image Preview'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.file(
-                  _capturedPhotos[buttonText]!,
-                  height: 200,
-                  width: 200,
-                  fit: BoxFit.cover,
-                ),
-                SizedBox(height: 10),
-                Text('Do you want to retake this photo?'),
-              ],
+            content: SizedBox(
+              width: double.maxFinite, // Set width to accommodate images
+              height: 400, // Set a fixed height for the scrollable area
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Wrap(
+                        spacing: 10,
+                        children: _capturedPhotos[buttonText]!.map((file) {
+                          return Image.file(
+                            file,
+                            height: 100,
+                            width: 100,
+                            fit: BoxFit.cover,
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10), // Space between images and text
+                  Text('Do you want to add more photos?'), // Static text
+                ],
+              ),
             ),
             actions: <Widget>[
               TextButton(
-                child: Text('Use this photo'),
+                child: Text('Add More'),
                 onPressed: () {
                   Navigator.of(context).pop();
+                  keepAdding = true; // Continue adding images
                 },
               ),
               TextButton(
-                child: Text('Retake'),
-                onPressed: () async {
+                child: Text('Done'),
+                onPressed: () {
                   Navigator.of(context).pop();
-                  await _captureNewImage(buttonText);
+                  keepAdding = false; // Stop adding images
+                  // Update button color to green
+                  setState(() {
+                    _buttonColors[buttonText] = Colors.green;
+                  });
                 },
               ),
             ],
           );
         },
       );
-    } else {
-      await _captureNewImage(buttonText);
     }
   }
 
@@ -327,17 +315,14 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
 
       if (pickedFile != null) {
         File imageFile = File(pickedFile.path);
+        // Only add the image to the list, do not change the button color here
         setState(() {
-          _buttonColors[buttonText] = Colors.green;
-          _capturedPhotos[buttonText] = imageFile;
+          _capturedPhotos[buttonText]!.add(imageFile);
         });
       }
-    } catch (e) {
-      print('Error picking image: $e');
     } finally {
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
+      await SystemChrome.setPreferredOrientations(
+          [DeviceOrientation.portraitUp]);
     }
   }
 
@@ -348,27 +333,7 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
         return AlertDialog(
           title: Text("Error"),
           content: Text(message),
-          actions: [
-            TextButton(
-              child: Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Success"),
-          content: Text("Images sent successfully!"),
-          actions: [
+          actions: <Widget>[
             TextButton(
               child: Text("OK"),
               onPressed: () {
@@ -384,7 +349,6 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
   Future<void> _sendImages() async {
     String? riskName = GlobalData.getRiskName();
 
-    // Show progress dialog
     _showProgressPopup(context);
 
     setState(() {
@@ -394,8 +358,9 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
     try {
       for (var entry in _capturedPhotos.entries) {
         final buttonName = entry.key;
-        final file = entry.value;
-        if (file != null) {
+        final files = entry.value;
+
+        for (var file in files) {
           final request = http.MultipartRequest(
             'POST',
             Uri.parse('http://124.43.209.68:9000/api/v1/upload'),
@@ -408,15 +373,8 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
 
           final response = await request.send();
 
-          if (response.statusCode == 200) {
-          } else {
+          if (response.statusCode != 200) {
             _showErrorDialog('Failed to send $buttonName image.');
-          }
-
-          if (buttonName == 'Wind Screen\nLabel') {
-            if (Navigator.canPop(context)) {
-              Navigator.of(context).pop();
-            }
           }
         }
       }
@@ -433,35 +391,53 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
     }
   }
 
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Success"),
+          content: Text("All images have been successfully uploaded."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _resetState() {
     setState(() {
       for (var label in _allButtonLabels) {
         _buttonColors[label] = Colors.white;
-        _capturedPhotos[label] = null;
+        _capturedPhotos[label] = [];
       }
     });
   }
-}
 
-void _showProgressPopup(BuildContext context) {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              CircularProgressIndicator(),
-              SizedBox(width: 20),
-              Text('Uploading images...'),
-            ],
+  void _showProgressPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 20),
+                Text('Sending...'),
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
+        );
+      },
+    );
+  }
 }
