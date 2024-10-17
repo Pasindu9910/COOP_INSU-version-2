@@ -248,64 +248,74 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
   }
 
   Future<void> _openCamera(String buttonText) async {
-    bool keepAdding = true;
+    if (buttonText == 'Accident Photos') {
+      // Allow multiple images for 'Accident Photos'
+      bool keepAdding = true;
 
-    while (keepAdding) {
-      await _captureNewImage(buttonText);
+      while (keepAdding) {
+        await _captureNewImage(buttonText);
 
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Image Preview'),
-            content: SizedBox(
-              width: double.maxFinite,
-              height: 400,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Wrap(
-                        spacing: 10,
-                        children: _capturedPhotos[buttonText]!.map((file) {
-                          return Image.file(
-                            file,
-                            height: 100,
-                            width: 100,
-                            fit: BoxFit.cover,
-                          );
-                        }).toList(),
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Image Preview'),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Wrap(
+                          spacing: 10,
+                          children: _capturedPhotos[buttonText]!.map((file) {
+                            return Image.file(
+                              file,
+                              height: 100,
+                              width: 100,
+                              fit: BoxFit.cover,
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 10),
-                  Text('Do you want to add more photos?'),
-                ],
+                    SizedBox(height: 10),
+                    Text('Do you want to add more photos?'),
+                  ],
+                ),
               ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text('Add More'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  keepAdding = true;
-                },
-              ),
-              TextButton(
-                child: Text('Done'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  keepAdding = false;
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Add More'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    keepAdding = true;
+                  },
+                ),
+                TextButton(
+                  child: Text('Done'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    keepAdding = false;
 
-                  setState(() {
-                    _buttonColors[buttonText] = Colors.green;
-                  });
-                },
-              ),
-            ],
-          );
-        },
-      );
+                    setState(() {
+                      _buttonColors[buttonText] = Colors.green;
+                    });
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } else {
+      // For other buttons, capture only one image
+      await _captureNewImage(buttonText);
+
+      setState(() {
+        _buttonColors[buttonText] = Colors.green; // Mark as done
+      });
     }
   }
 
