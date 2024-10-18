@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:customer_portal/Screens/changepassword.dart';
+import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -232,6 +233,7 @@ class _LoginPageState extends State<LoginPage> {
 
             if (userData['user_name'] == username &&
                 userData['password'] == password) {
+              GlobalData.setLoggedInUserName(username);
               Navigator.pushReplacementNamed(
                 context,
                 '/Ownervehicle',
@@ -252,6 +254,7 @@ class _LoginPageState extends State<LoginPage> {
 
           if (userData['user_name'] == username &&
               userData['password'] == password) {
+            GlobalData.setLoggedInUserName(username);
             Navigator.pushReplacementNamed(
               context,
               '/Ownervehicle',

@@ -1,6 +1,8 @@
-// ignore_for_file: deprecated_member_use
+import 'dart:io';
 
+import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ChoicesPage extends StatefulWidget {
@@ -13,8 +15,25 @@ class ChoicesPage extends StatefulWidget {
 }
 
 class _ChoicesPageState extends State<ChoicesPage> {
+  String? userName = GlobalData.getLoggedInUserName();
+  // Create a GlobalKey for the Scaffold
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  File? _imageFile; // Variable to store the selected image
+
   void _launchURL(String url) async {
     launch(url);
+  }
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile =
+        await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path); // Store the selected image file
+      });
+    }
   }
 
   @override
@@ -24,224 +43,282 @@ class _ChoicesPageState extends State<ChoicesPage> {
         debugShowCheckedModeBanner: false,
         home: DefaultTabController(
           length: 2,
-          child: Scaffold(
-            appBar: AppBar(
-              backgroundColor: Color.fromARGB(255, 0, 68, 124),
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              bottom: const TabBar(
-                labelColor: Colors.white,
-                indicator: UnderlineTabIndicator(
-                  borderSide: BorderSide(
-                    width: 5.0,
-                    color: Color.fromARGB(255, 244, 212, 33),
-                  ),
-                  insets: EdgeInsets.symmetric(horizontal: 1.0),
-                ),
-                unselectedLabelColor: Colors.white,
-                tabs: [
-                  Tab(text: 'Services'),
-                  Tab(text: 'About Us'),
-                ],
-              ),
-              title: Center(
-                child: Transform.translate(
-                  offset: const Offset(-30, 0),
-                  child: const Text(
-                    'Main Menu',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Georgia',
-                      fontSize: 30.0,
+          child: Builder(
+            builder: (context) {
+              return Scaffold(
+                key: _scaffoldKey, // Assign the key to the Scaffold
+                appBar: AppBar(
+                  backgroundColor: Color.fromARGB(255, 0, 68, 124),
+                  automaticallyImplyLeading: false,
+                  actions: [
+                    IconButton(
+                      icon: Icon(Icons.person, color: Colors.white),
+                      onPressed: () {
+                        // Open the drawer using the Scaffold's key
+                        _scaffoldKey.currentState?.openDrawer();
+                      },
                     ),
-                  ),
-                ),
-              ),
-            ),
-            body: TabBarView(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/background2.png'),
-                      fit: BoxFit.cover,
+                  ],
+                  bottom: const TabBar(
+                    labelColor: Colors.white,
+                    indicator: UnderlineTabIndicator(
+                      borderSide: BorderSide(
+                        width: 5.0,
+                        color: Color.fromARGB(255, 244, 212, 33),
+                      ),
+                      insets: EdgeInsets.symmetric(horizontal: 1.0),
                     ),
+                    unselectedLabelColor: Colors.white,
+                    tabs: [
+                      Tab(text: 'Services'),
+                      Tab(text: 'About Us'),
+                    ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      children: [
-                        // Top two full-width buttons with padding
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10.0),
-                          child: _buildFullWidthButton(
-                            context,
-                            'New Policy',
-                            '/Inspection',
-                            imagePath: 'assets/protection.png',
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10.0),
-                          child: _buildFullWidthButton(
-                            context,
-                            'Accident Report',
-                            '/Accident',
-                            imagePath: 'assets/crash.png',
-                          ),
-                        ),
-
-                        // Spacer between buttons and grid
-                        SizedBox(height: 10),
-
-                        // Grid for the remaining buttons
-                        Expanded(
-                          child: GridView.count(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 20,
-                            crossAxisSpacing: 20,
-                            childAspectRatio: 1.2,
-                            children: [
-                              _buildButton(
-                                context,
-                                'Policy Information',
-                                '/Policyinfo',
-                                imagePath: 'assets/policy.png',
-                                nicNumber: widget.nicNumber,
-                              ),
-                              _buildButton(
-                                context,
-                                'ARI',
-                                imagePath: 'assets/insurance.png',
-                                null,
-                              ),
-                              _buildButton(
-                                context,
-                                'Third Party renewal',
-                                null,
-                                imagePath: 'assets/renewal.png',
-                                url: 'https://online.ci.lk/third_party/',
-                              ),
-                              _buildButton(
-                                context,
-                                'Premium payment',
-                                null,
-                                imagePath: 'assets/pay.png',
-                                url: 'https://online.ci.lk/general/',
-                              ),
-                              _buildButton(
-                                context,
-                                'Quotation',
-                                null,
-                                imagePath: 'assets/pay.png',
-                                url: 'https://ci.lk/getamotorquote/',
-                              ),
-                              _buildButton(
-                                context,
-                                'Customer feedback',
-                                null,
-                                imagePath: 'assets/customer.png',
-                                url: 'https://ci.lk/complaint/ ',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // 'About Us' tab content remains unchanged
-                Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/background2.png'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  child: Stack(
-                    children: [
-                      SingleChildScrollView(
-                        padding: EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            Center(
-                              child: Text(
-                                "About Us",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontFamily: 'Georgia',
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 20),
-                            _buildTile(
-                              title: "Co-operative Insurance Company PLC",
-                              content:
-                                  "Incorporated in Sri Lanka in 1999. Licensed as a company authorized to carry out insurance business under the Control of Insurance Act No. 25 of 1962 as amended by Act No. 42 of 1986 (presently replaced by Regulation of Insurance Industry Act No. 43 of 2000). We are one of the leading insurers who provide innovative insurance solutions across all lines of business, with the third-largest network in Sri Lanka.",
-                            ),
-                            _buildTile(
-                              title: "History",
-                              content:
-                                  "In 1999, Co-operative Insurance Company PLC (CICPLC) was established by the co-operative movement with great prospects. More than 2 decades and numerous challenges later, CICPLC is one of the largest and fastest-growing companies in Sri Lanka.\n\nAs a customer-centric and people-driven organization, we inspire our stakeholders to be proactive and innovative. Our utmost convenient solutions set us apart from other orthodox entities in the industry.",
-                            ),
-                            _buildTile(
-                              title: "Vision",
-                              content:
-                                  "“To be an organization that will stand 'united' with its customers to the very end.”",
-                            ),
-                            _buildTile(
-                              title: "Mission",
-                              content:
-                                  "“To be ever mindful of the needs of our customers and thereby make 'true protection' via the provision of innovative, yet affordable insurance solutions which conform to the highest ethical and moral standards.”",
-                            ),
-                            _buildTile(
-                              title: "Values",
-                              content:
-                                  "R - Respect - Respectful when REACT\nE - Ethical - Ethical when REACT\nA - Accountable - Accountable when REACT\nC - Commitment - Committed when REACT\nT - Trust - Trustworthy when REACT",
-                            ),
-                          ],
+                  title: Center(
+                    child: Transform.translate(
+                      offset: const Offset(30, 0),
+                      child: const Text(
+                        'Main Menu',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Georgia',
+                          fontSize: 30.0,
                         ),
                       ),
-                      Positioned(
-                        right: 16,
-                        bottom: 50,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            _buildSocialButton('assets/youtube.png', () async {
-                              launch(
-                                  'https://www.youtube.com/channel/UC6-Ex5c_AFfBi7mJxP6dsIw');
-                            }),
-                            SizedBox(height: 16),
-                            _buildSocialButton(
-                              'assets/linkedin.png',
-                              () async {
-                                launch(
-                                    'https://www.linkedin.com/company/co-operative-insurance/');
-                              },
-                            ),
-                            SizedBox(height: 16),
-                            _buildSocialButton(
-                              'assets/facebook.png',
-                              () async {
-                                launch(
-                                    'https://www.facebook.com/Coperativeinsurance/');
-                              },
-                            ),
-                          ],
+                    ),
+                  ),
+                ),
+                drawer: Drawer(
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: <Widget>[
+                      UserAccountsDrawerHeader(
+                        decoration: BoxDecoration(
+                          color: Color.fromARGB(
+                              255, 0, 68, 124), // Dark blue color
                         ),
+                        accountName: Text(
+                          userName ?? "User Name",
+                          style: TextStyle(fontFamily: 'Georgia', fontSize: 18),
+                        ),
+                        accountEmail: Text("user@example.com"),
+                        currentAccountPicture: GestureDetector(
+                          onTap: _pickImage, // Trigger the image picker on tap
+                          child: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: _imageFile != null
+                                ? ClipOval(
+                                    child: Image.file(
+                                      _imageFile!,
+                                      fit: BoxFit.cover,
+                                      width: 90.0,
+                                      height: 90.0,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: Color.fromARGB(255, 0, 68, 124),
+                                  ),
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.logout, color: Colors.black),
+                        title: Text('Logout',
+                            style: TextStyle(fontFamily: 'Georgia')),
+                        onTap: () {
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            '/Login',
+                            (Route<dynamic> route) =>
+                                false, // Clears the navigation stack
+                          ); // Navigate to the Login page
+                        },
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+                body: TabBarView(
+                  children: [
+                    // Services tab content
+                    Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/background2.png'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 10.0),
+                              child: _buildFullWidthButton(
+                                context,
+                                'New Policy',
+                                '/Inspection',
+                                imagePath: 'assets/protection.png',
+                              ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 10.0),
+                              child: _buildFullWidthButton(
+                                context,
+                                'Accident Report',
+                                '/Accident',
+                                imagePath: 'assets/crash.png',
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Expanded(
+                              child: GridView.count(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 20,
+                                crossAxisSpacing: 20,
+                                childAspectRatio: 1.2,
+                                children: [
+                                  _buildButton(
+                                    context,
+                                    'Policy Information',
+                                    '/Policyinfo',
+                                    imagePath: 'assets/policy.png',
+                                    nicNumber: widget.nicNumber,
+                                  ),
+                                  _buildButton(
+                                    context,
+                                    'ARI',
+                                    imagePath: 'assets/insurance.png',
+                                    null,
+                                  ),
+                                  _buildButton(
+                                    context,
+                                    'Third Party renewal',
+                                    null,
+                                    imagePath: 'assets/renewal.png',
+                                    url: 'https://online.ci.lk/third_party/',
+                                  ),
+                                  _buildButton(
+                                    context,
+                                    'Premium payment',
+                                    null,
+                                    imagePath: 'assets/pay.png',
+                                    url: 'https://online.ci.lk/general/',
+                                  ),
+                                  _buildButton(
+                                    context,
+                                    'Quotation',
+                                    null,
+                                    imagePath: 'assets/pay.png',
+                                    url: 'https://ci.lk/getamotorquote/',
+                                  ),
+                                  _buildButton(
+                                    context,
+                                    'Customer feedback',
+                                    null,
+                                    imagePath: 'assets/customer.png',
+                                    url: 'https://ci.lk/complaint/ ',
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // About Us tab content
+                    Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/background2.png'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: Stack(
+                        children: [
+                          SingleChildScrollView(
+                            padding: EdgeInsets.all(20),
+                            child: Column(
+                              children: [
+                                Center(
+                                  child: Text(
+                                    "About Us",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontFamily: 'Georgia',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 20),
+                                _buildTile(
+                                  title: "Co-operative Insurance Company PLC",
+                                  content:
+                                      "Incorporated in Sri Lanka in 1999. Licensed as a company authorized to carry out insurance business under the Control of Insurance Act No. 25 of 1962 as amended by Act No. 42 of 1986 (presently replaced by Regulation of Insurance Industry Act No. 43 of 2000). We are one of the leading insurers who provide innovative insurance solutions across all lines of business, with the third-largest network in Sri Lanka.",
+                                ),
+                                _buildTile(
+                                  title: "History",
+                                  content:
+                                      "In 1999, Co-operative Insurance Company PLC (CICPLC) was established by the co-operative movement with great prospects. More than 2 decades and numerous challenges later, CICPLC is one of the largest and fastest-growing companies in Sri Lanka.\n\nAs a customer-centric and people-driven organization, we inspire our stakeholders to be proactive and innovative. Our utmost convenient solutions set us apart from other orthodox entities in the industry.",
+                                ),
+                                _buildTile(
+                                  title: "Vision",
+                                  content:
+                                      "“To be an organization that will stand 'united' with its customers to the very end.”",
+                                ),
+                                _buildTile(
+                                  title: "Mission",
+                                  content:
+                                      "“To be ever mindful of the needs of our customers and thereby make 'true protection' via the provision of innovative, yet affordable insurance solutions which conform to the highest ethical and moral standards.”",
+                                ),
+                                _buildTile(
+                                  title: "Values",
+                                  content:
+                                      "R - Respect - Respectful when REACT\nE - Ethical - Ethical when REACT\nA - Accountable - Accountable when REACT\nC - Commitment - Committed when REACT\nT - Trust - Trustworthy when REACT",
+                                ),
+                              ],
+                            ),
+                          ),
+                          Positioned(
+                            right: 16,
+                            bottom: 50,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                _buildSocialButton('assets/youtube.png',
+                                    () async {
+                                  launch(
+                                      'https://www.youtube.com/channel/UC6-Ex5c_AFfBi7mJxP6dsIw');
+                                }),
+                                SizedBox(height: 16),
+                                _buildSocialButton(
+                                  'assets/linkedin.png',
+                                  () async {
+                                    launch(
+                                        'https://www.linkedin.com/company/co-operative-insurance/');
+                                  },
+                                ),
+                                SizedBox(height: 16),
+                                _buildSocialButton(
+                                  'assets/facebook.png',
+                                  () async {
+                                    launch(
+                                        'https://www.facebook.com/Coperativeinsurance/');
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
