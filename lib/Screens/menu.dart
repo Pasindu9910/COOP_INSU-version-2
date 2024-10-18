@@ -50,7 +50,7 @@ class _ChoicesPageState extends State<ChoicesPage> {
               ),
               title: Center(
                 child: Transform.translate(
-                  offset: const Offset(-30, 0), // Move text 10px to the left
+                  offset: const Offset(-30, 0),
                   child: const Text(
                     'Main Menu',
                     style: TextStyle(
@@ -71,72 +71,90 @@ class _ChoicesPageState extends State<ChoicesPage> {
                       fit: BoxFit.cover,
                     ),
                   ),
-                  child: Center(
-                    child: GridView.count(
-                      shrinkWrap: true,
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 20,
-                      crossAxisSpacing: 20,
-                      padding: EdgeInsets.all(20),
-                      childAspectRatio: 1.5,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
                       children: [
-                        _buildButton(
-                          context,
-                          'Policy Information',
-                          '/Policyinfo',
-                          imagePath: 'assets/policy.png',
-                          nicNumber: widget.nicNumber,
+                        // Top two full-width buttons with padding
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: _buildFullWidthButton(
+                            context,
+                            'New Policy',
+                            '/Inspection',
+                            imagePath: 'assets/protection.png',
+                          ),
                         ),
-                        _buildButton(
-                          context,
-                          'Vehicle Inspection',
-                          '/Inspection',
-                          imagePath: 'assets/protection.png',
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: _buildFullWidthButton(
+                            context,
+                            'Accident Report',
+                            '/Accident',
+                            imagePath: 'assets/crash.png',
+                          ),
                         ),
-                        _buildButton(
-                          context,
-                          'ARI',
-                          imagePath: 'assets/insurance.png',
-                          null,
-                        ),
-                        _buildButton(
-                          context,
-                          'Accident Report',
-                          '/Accident',
-                          imagePath: 'assets/crash.png',
-                        ),
-                        _buildButton(
-                          context,
-                          'Third Party renewal',
-                          null,
-                          imagePath: 'assets/renewal.png',
-                          url: 'https://online.ci.lk/third_party/',
-                        ),
-                        _buildButton(
-                          context,
-                          'Premium payment',
-                          null,
-                          imagePath: 'assets/pay.png',
-                          url: 'https://online.ci.lk/general/',
-                        ),
-                        _buildButton(
-                          context,
-                          'Quotation',
-                          null,
-                          imagePath: 'assets/pay.png',
-                          url: 'https://ci.lk/getamotorquote/',
-                        ),
-                        _buildButton(
-                          context,
-                          'Customer feedback',
-                          null,
-                          imagePath: 'assets/customer.png',
-                          url: 'https://ci.lk/complaint/ ',
+
+                        // Spacer between buttons and grid
+                        SizedBox(height: 10),
+
+                        // Grid for the remaining buttons
+                        Expanded(
+                          child: GridView.count(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 20,
+                            crossAxisSpacing: 20,
+                            childAspectRatio: 1.2,
+                            children: [
+                              _buildButton(
+                                context,
+                                'Policy Information',
+                                '/Policyinfo',
+                                imagePath: 'assets/policy.png',
+                                nicNumber: widget.nicNumber,
+                              ),
+                              _buildButton(
+                                context,
+                                'ARI',
+                                imagePath: 'assets/insurance.png',
+                                null,
+                              ),
+                              _buildButton(
+                                context,
+                                'Third Party renewal',
+                                null,
+                                imagePath: 'assets/renewal.png',
+                                url: 'https://online.ci.lk/third_party/',
+                              ),
+                              _buildButton(
+                                context,
+                                'Premium payment',
+                                null,
+                                imagePath: 'assets/pay.png',
+                                url: 'https://online.ci.lk/general/',
+                              ),
+                              _buildButton(
+                                context,
+                                'Quotation',
+                                null,
+                                imagePath: 'assets/pay.png',
+                                url: 'https://ci.lk/getamotorquote/',
+                              ),
+                              _buildButton(
+                                context,
+                                'Customer feedback',
+                                null,
+                                imagePath: 'assets/customer.png',
+                                url: 'https://ci.lk/complaint/ ',
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
+                // 'About Us' tab content remains unchanged
                 Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
@@ -225,6 +243,57 @@ class _ChoicesPageState extends State<ChoicesPage> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFullWidthButton(BuildContext context, String text, String? route,
+      {String? imagePath, String? nicNumber, String? url}) {
+    return SizedBox(
+      width: double.infinity, // Full width
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(vertical: 20), // Adjust button padding
+          backgroundColor: Color.fromARGB(255, 255, 255, 255),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          elevation: 15,
+          shadowColor: Colors.black,
+        ),
+        onPressed: () {
+          if (url != null) {
+            _launchURL(url);
+          } else if (route != null) {
+            Navigator.pushNamed(
+              context,
+              route,
+              arguments: nicNumber,
+            );
+          }
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (imagePath != null)
+              Image.asset(
+                imagePath,
+                height: 40,
+                width: 60,
+              ),
+            SizedBox(height: 8),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: const Color.fromARGB(255, 0, 0, 0),
+                fontFamily: 'Georgia',
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
     );
