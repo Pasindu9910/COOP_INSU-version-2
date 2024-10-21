@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:io';
 
 import 'package:customer_portal/global_data.dart';
@@ -16,9 +18,9 @@ class ChoicesPage extends StatefulWidget {
 
 class _ChoicesPageState extends State<ChoicesPage> {
   String? userName = GlobalData.getLoggedInUserName();
-  // Create a GlobalKey for the Scaffold
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  File? _imageFile; // Variable to store the selected image
+  File? _imageFile;
 
   void _launchURL(String url) async {
     launch(url);
@@ -31,7 +33,7 @@ class _ChoicesPageState extends State<ChoicesPage> {
 
     if (pickedFile != null) {
       setState(() {
-        _imageFile = File(pickedFile.path); // Store the selected image file
+        _imageFile = File(pickedFile.path);
       });
     }
   }
@@ -46,7 +48,7 @@ class _ChoicesPageState extends State<ChoicesPage> {
           child: Builder(
             builder: (context) {
               return Scaffold(
-                key: _scaffoldKey, // Assign the key to the Scaffold
+                key: _scaffoldKey,
                 appBar: AppBar(
                   backgroundColor: Color.fromARGB(255, 0, 68, 124),
                   automaticallyImplyLeading: false,
@@ -54,7 +56,6 @@ class _ChoicesPageState extends State<ChoicesPage> {
                     IconButton(
                       icon: Icon(Icons.person, color: Colors.white),
                       onPressed: () {
-                        // Open the drawer using the Scaffold's key
                         _scaffoldKey.currentState?.openDrawer();
                       },
                     ),
@@ -89,53 +90,69 @@ class _ChoicesPageState extends State<ChoicesPage> {
                   ),
                 ),
                 drawer: Drawer(
-                  child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: <Widget>[
-                      UserAccountsDrawerHeader(
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB(
-                              255, 0, 68, 124), // Dark blue color
-                        ),
-                        accountName: Text(
-                          userName ?? "User Name",
-                          style: TextStyle(fontFamily: 'Georgia', fontSize: 18),
-                        ),
-                        accountEmail: Text("user@example.com"),
-                        currentAccountPicture: GestureDetector(
-                          onTap: _pickImage, // Trigger the image picker on tap
-                          child: CircleAvatar(
-                            backgroundColor: Colors.white,
-                            child: _imageFile != null
-                                ? ClipOval(
-                                    child: Image.file(
-                                      _imageFile!,
-                                      fit: BoxFit.cover,
-                                      width: 90.0,
-                                      height: 90.0,
+                  child: Container(
+                    color: Color.fromARGB(255, 0, 68, 124),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Spacer(),
+
+                        // Profile picture
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(left: 16.0, bottom: 8.0),
+                          child: GestureDetector(
+                            onTap: _pickImage,
+                            child: CircleAvatar(
+                              radius: 40,
+                              backgroundColor: Colors.white,
+                              child: _imageFile != null
+                                  ? ClipOval(
+                                      child: Image.file(
+                                        _imageFile!,
+                                        fit: BoxFit.cover,
+                                        width: 80.0,
+                                        height: 80.0,
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.person,
+                                      size: 50,
+                                      color: Color.fromARGB(255, 0, 68, 124),
                                     ),
-                                  )
-                                : Icon(
-                                    Icons.person,
-                                    size: 50,
-                                    color: Color.fromARGB(255, 0, 68, 124),
-                                  ),
+                            ),
                           ),
                         ),
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.logout, color: Colors.black),
-                        title: Text('Logout',
-                            style: TextStyle(fontFamily: 'Georgia')),
-                        onTap: () {
-                          Navigator.of(context).pushNamedAndRemoveUntil(
-                            '/Login',
-                            (Route<dynamic> route) =>
-                                false, // Clears the navigation stack
-                          ); // Navigate to the Login page
-                        },
-                      ),
-                    ],
+
+                        // Email text
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                userName ?? "User Name",
+                                style: TextStyle(
+                                  fontFamily: 'Georgia',
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                "user@example.com",
+                                style: TextStyle(
+                                  fontFamily: 'Georgia',
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 body: TabBarView(
