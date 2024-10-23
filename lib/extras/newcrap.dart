@@ -1,8 +1,11 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'dart:io';
+
 import 'package:customer_portal/global_data.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChoicesPage extends StatefulWidget {
   final String nicNumber;
@@ -15,8 +18,24 @@ class ChoicesPage extends StatefulWidget {
 
 class _ChoicesPageState extends State<ChoicesPage> {
   String? userName = GlobalData.getLoggedInUserName();
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  File? _imageFile;
+
   void _launchURL(String url) async {
     launch(url);
+  }
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile =
+        await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
   }
 
   @override
@@ -26,89 +45,117 @@ class _ChoicesPageState extends State<ChoicesPage> {
         debugShowCheckedModeBanner: false,
         home: DefaultTabController(
           length: 2,
-          child: Scaffold(
-            appBar: AppBar(
-              backgroundColor: Color.fromARGB(255, 0, 68, 124),
-              leading: Builder(
-                builder: (context) => IconButton(
-                  icon: Icon(Icons.menu, color: Colors.white),
-                  onPressed: () {
-                    Scaffold.of(context).openDrawer();
-                  },
-                ),
-              ),
-              bottom: const TabBar(
-                labelColor: Colors.white,
-                indicator: UnderlineTabIndicator(
-                  borderSide: BorderSide(
-                    width: 5.0,
-                    color: Color.fromARGB(255, 244, 212, 33),
-                  ),
-                  insets: EdgeInsets.symmetric(horizontal: 1.0),
-                ),
-                unselectedLabelColor: Colors.white,
-                tabs: [
-                  Tab(text: 'Services'),
-                  Tab(text: 'About Us'),
-                ],
-              ),
-              title: Center(
-                child: Transform.translate(
-                  offset: const Offset(-30, 0),
-                  child: const Text(
-                    'Main Menu',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Georgia',
-                      fontSize: 30.0,
+          child: Builder(
+            builder: (context) {
+              return Scaffold(
+                key: _scaffoldKey,
+                appBar: AppBar(
+                  backgroundColor: Color.fromARGB(255, 0, 68, 124),
+                  automaticallyImplyLeading: false,
+                  actions: [
+                    IconButton(
+                      icon: Icon(Icons.person, color: Colors.white),
+                      onPressed: () {
+                        _scaffoldKey.currentState?.openDrawer();
+                      },
                     ),
+                  ],
+                  bottom: const TabBar(
+                    labelColor: Colors.white,
+                    indicator: UnderlineTabIndicator(
+                      borderSide: BorderSide(
+                        width: 5.0,
+                        color: Color.fromARGB(255, 244, 212, 33),
+                      ),
+                      insets: EdgeInsets.symmetric(horizontal: 1.0),
+                    ),
+                    unselectedLabelColor: Colors.white,
+                    tabs: [
+                      Tab(text: 'Services'),
+                      Tab(text: 'About Us'),
+                    ],
                   ),
-                ),
-              ),
-            ),
-            drawer: Drawer(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: <Widget>[
-                  UserAccountsDrawerHeader(
-                    accountName: Text(userName ?? "User Name"),
-                    accountEmail: Text(widget.nicNumber),
-                    currentAccountPicture: CircleAvatar(
-                      backgroundColor: Colors.white,
-                      child: Icon(
-                        Icons.person,
-                        size: 50,
-                        color: Color.fromARGB(255, 0, 68, 124),
+                  title: Center(
+                    child: Transform.translate(
+                      offset: const Offset(30, 0),
+                      child: const Text(
+                        'Main Menu',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Georgia',
+                          fontSize: 30.0,
+                        ),
                       ),
                     ),
-                    decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 0, 68, 124),
+                  ),
+                ),
+                drawer: Drawer(
+                  child: Container(
+                    color: Color.fromARGB(255, 0, 68, 124),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Spacer(),
+
+                        // Profile picture
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(left: 16.0, bottom: 8.0),
+                          child: GestureDetector(
+                            onTap: _pickImage,
+                            child: CircleAvatar(
+                              radius: 40,
+                              backgroundColor: Colors.white,
+                              child: _imageFile != null
+                                  ? ClipOval(
+                                      child: Image.file(
+                                        _imageFile!,
+                                        fit: BoxFit.cover,
+                                        width: 80.0,
+                                        height: 80.0,
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.person,
+                                      size: 50,
+                                      color: Color.fromARGB(255, 0, 68, 124),
+                                    ),
+                            ),
+                          ),
+                        ),
+
+                        // Email text
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                userName ?? "User Name",
+                                style: TextStyle(
+                                  fontFamily: 'Georgia',
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                "user@example.com",
+                                style: TextStyle(
+                                  fontFamily: 'Georgia',
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  ListTile(
-                    leading: Icon(Icons.home),
-                    title: Text('Home'),
-                    onTap: () {
-                      Navigator.pop(context); // Close the drawer
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.logout),
-                    title: Text('Logout'),
-                    onTap: () {
-                      // Handle logout action here
-                     Navigator.pushNamedAndRemoveUntil(
-                        context, 
-                        '/Login', 
-                        ModalRoute.withName('/decision'), // Keeps '/decision' in the stack
-                      );
-                      // You could also implement a logout function here
-                    },
-                  ),
-                ],
-              ),
-            ),
-            body: TabBarView(
+                ),
+                body: TabBarView(
                   children: [
                     // Services tab content
                     Container(
@@ -125,27 +172,21 @@ class _ChoicesPageState extends State<ChoicesPage> {
                             Padding(
                               padding:
                                   const EdgeInsets.symmetric(vertical: 10.0),
-                              child: SizedBox(
-                                height: 150,
-                                child: _buildFullWidthButton(
-                                  context,
-                                  'New Policy',
-                                  '/Inspection',
-                                  imagePath: 'assets/protection.png',
-                                ),
+                              child: _buildFullWidthButton(
+                                context,
+                                'New Policy',
+                                '/Inspection',
+                                imagePath: 'assets/protection.png',
                               ),
                             ),
                             Padding(
                               padding:
                                   const EdgeInsets.symmetric(vertical: 10.0),
-                              child: SizedBox(
-                                height: 150,
-                                child: _buildFullWidthButton(
-                                  context,
-                                  'Accident Report',
-                                  '/Accident',
-                                  imagePath: 'assets/crash.png',
-                                ),
+                              child: _buildFullWidthButton(
+                                context,
+                                'Accident Report',
+                                '/Accident',
+                                imagePath: 'assets/crash.png',
                               ),
                             ),
                             SizedBox(height: 10),
@@ -293,6 +334,8 @@ class _ChoicesPageState extends State<ChoicesPage> {
                     ),
                   ],
                 ),
+              );
+            },
           ),
         ),
       ),
