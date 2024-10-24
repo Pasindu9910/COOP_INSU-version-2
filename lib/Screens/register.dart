@@ -36,6 +36,33 @@ class _RegisterpageState extends State<Registerpage> {
     super.dispose();
   }
 
+  Future<bool> _requestUserConsent() async {
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Data Collection Consent"),
+          content: const Text(
+              "We collect your personal details to process your registration. Your data is securely transmitted and not shared with third parties without your consent. Do you agree?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text("No"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text("Yes"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -47,7 +74,7 @@ class _RegisterpageState extends State<Registerpage> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // Navigate back
             },
           ),
         ),
@@ -72,13 +99,6 @@ class _RegisterpageState extends State<Registerpage> {
                           Text(
                             "Register",
                             style: TextStyle(
-                              shadows: [
-                                Shadow(
-                                  blurRadius: 5.0,
-                                  color: Colors.black,
-                                  offset: Offset(2, 2),
-                                ),
-                              ],
                               fontSize: 80.0,
                               fontFamily: 'Georgia',
                               color: Colors.white,
@@ -370,78 +390,64 @@ class _RegisterpageState extends State<Registerpage> {
                                   ),
                                   onPressed: () async {
                                     if (_formKey.currentState!.validate()) {
-                                      final nic = nationalID.text;
-                                      final Uri checkNicUrl = Uri.parse(
-                                          'http://124.43.209.68:9010/api/v3/getBynic/$nic');
+                                      // Create a map to store the input data
+                                      bool consent =
+                                          await _requestUserConsent();
+
+                                      if (!consent) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                "You need to consent to proceed"),
+                                          ),
+                                        );
+                                        return; // Exit if user does not consent
+                                      }
+
+                                      final Map<String, dynamic> inputData = {
+                                        'title': _title,
+                                        'first_name': firstname.text,
+                                        'last_name': lastname.text,
+                                        'user_name': username.text,
+                                        'nic': nationalID.text,
+                                        'mobile_no': mobile.text,
+                                        'email': email.text,
+                                        'password': password.text,
+                                      };
 
                                       try {
-                                        final checkResponse =
-                                            await http.get(checkNicUrl);
+                                        // Make a POST request to the API endpoint
+                                        final Uri apiUrl = Uri.parse(
+                                            'http://124.43.209.68:9010/api/v3/saveOldCustomer');
+                                        final response = await http.post(
+                                          apiUrl,
+                                          headers: {
+                                            'Content-Type': 'application/json',
+                                          },
+                                          body: jsonEncode(inputData),
+                                        );
 
-                                        if (checkResponse.statusCode == 200) {
-                                          final responseData =
-                                              jsonDecode(checkResponse.body);
-
-                                          if (responseData != null &&
-                                              responseData['data'] != null) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                    'A user with this NIC already exists.'),
-                                              ),
-                                            );
-                                          } else {
-                                            final Map<String, dynamic>
-                                                inputData = {
-                                              'title': _title,
-                                              'first_name': firstname.text,
-                                              'last_name': lastname.text,
-                                              'user_name': username.text,
-                                              'nic': nationalID.text,
-                                              'mobile_no': mobile.text,
-                                              'email': email.text,
-                                              'password': password.text,
-                                            };
-
-                                            final Uri apiUrl = Uri.parse(
-                                                'http://124.43.209.68:9010/api/v3/saveOldCustomer');
-                                            final response = await http.post(
-                                              apiUrl,
-                                              headers: {
-                                                'Content-Type':
-                                                    'application/json'
-                                              },
-                                              body: jsonEncode(inputData),
-                                            );
-
-                                            if (response.statusCode == 200) {
-                                              Navigator.pushReplacementNamed(
-                                                  context, '/Login');
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                    content: Text(
-                                                        'Registration successful!')),
-                                              );
-                                            } else {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(
-                                                    content: Text(
-                                                        'Registration failed: ${response.statusCode}')),
-                                              );
-                                            }
-                                          }
-                                        } else {
+                                        // Check the response status code
+                                        if (response.statusCode == 200) {
+                                          // Registration successful, show a success message
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             const SnackBar(
                                                 content: Text(
-                                                    'Error checking NIC. Please try again.')),
+                                                    'Registration successful!')),
+                                          );
+                                        } else {
+                                          // Registration failed, show an error message
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                                content: Text(
+                                                    'Registration failed: ${response.statusCode}')),
                                           );
                                         }
                                       } catch (e) {
+                                        // Handle potential exceptions
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           const SnackBar(

@@ -1,245 +1,469 @@
-// ignore_for_file: sort_child_properties_last, use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously
 
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class ChangePassword extends StatefulWidget {
-  const ChangePassword({super.key});
+import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+class Registerpage extends StatefulWidget {
+  const Registerpage({super.key});
 
   @override
-  State<ChangePassword> createState() => _ChangePasswordState();
+  State<Registerpage> createState() => _RegisterpageState();
 }
 
-class _ChangePasswordState extends State<ChangePassword> {
+class _RegisterpageState extends State<Registerpage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nicController = TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  String? _title;
+  final firstname = TextEditingController();
+  final lastname = TextEditingController();
+  final username = TextEditingController();
+  final nationalID = TextEditingController();
+  final mobile = TextEditingController();
+  final email = TextEditingController();
+  final password = TextEditingController();
 
-  bool _isLoading = false;
-  String? _errorMessage;
+  @override
+  void dispose() {
+    firstname.dispose();
+    lastname.dispose();
+    username.dispose();
+    nationalID.dispose();
+    mobile.dispose();
+    email.dispose();
+    password.dispose();
+    super.dispose();
+  }
+
+  Future<bool> _requestUserConsent() async {
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Data Collection Consent"),
+          content: const Text(
+              "We collect your personal details to process your registration. Your data is securely transmitted and not shared with third parties without your consent. Do you agree?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text("No"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text("Yes"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: const Text(
-            'Change Password',
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'Georgia',
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.of(context).pop(); // Navigate back
+            },
+          ),
+        ),
+        body: Container(
+          height: MediaQuery.of(context).size.height,
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/background2.png'),
+              fit: BoxFit.cover,
             ),
           ),
-          iconTheme: const IconThemeData(color: Colors.white),
-          backgroundColor: const Color.fromARGB(255, 0, 68, 124),
-        ),
-        body: Stack(
-          children: [
-            // Background image
-            Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/background2.png'),
-                  fit: BoxFit.cover, // Ensures the image covers the whole page
-                ),
-              ),
-            ),
-            // Foreground content (the form)
-            Center(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Display the change.jpg image
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                              75), // Make the border radius half the height for a circular shape
-                          child: Image.asset(
-                            'assets/change.jpg',
-                            height: 150, // Adjust height as needed
-                            width:
-                                150, // Make sure the width and height are equal for a perfect circle
-                            fit: BoxFit
-                                .cover, // Ensures the image covers the circle properly
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        // NIC Number input field
-                        TextFormField(
-                          controller: _nicController,
-                          decoration: const InputDecoration(
-                            labelText: 'NIC Number:',
-                            border: OutlineInputBorder(),
-                            labelStyle: TextStyle(color: Colors.white),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your NIC number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        // New Password input field
-                        TextFormField(
-                          controller: _newPasswordController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            labelText: 'New Password:',
-                            border: OutlineInputBorder(),
-                            labelStyle: TextStyle(color: Colors.white),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your new password';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        // Confirm Password input field
-                        TextFormField(
-                          controller: _confirmPasswordController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Confirm Passowrd:',
-                            border: OutlineInputBorder(),
-                            labelStyle: TextStyle(color: Colors.white),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please confirm your password';
-                            }
-                            if (value != _newPasswordController.text) {
-                              return 'Passwords do not match';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 30),
-                        // Error message
-                        if (_errorMessage != null)
+          child: SingleChildScrollView(
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Column(
+                        children: [
                           Text(
-                            _errorMessage!,
-                            style: const TextStyle(
-                                color: Colors.red, fontSize: 16),
-                          ),
-                        const SizedBox(height: 10),
-                        // Confirm button
-                        SizedBox(
-                          width: 280,
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: () {},
-                            child: ElevatedButton(
-                              onPressed: _isLoading
-                                  ? null // Disable button when loading
-                                  : () {
-                                      if (_formKey.currentState!.validate()) {
-                                        // Perform password change logic based on NIC number
-                                        _changePassword(_nicController.text,
-                                            _newPasswordController.text);
-                                      }
-                                    },
-                              child: _isLoading
-                                  ? const CircularProgressIndicator(
-                                      color: Colors.white,
-                                    )
-                                  : const Text(
-                                      'Confirm',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          color: Color.fromARGB(255, 0, 0, 0)),
-                                    ),
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                backgroundColor: Colors.green,
-                                elevation: 10,
-                                shadowColor: const Color.fromARGB(255, 6, 6, 6),
-                              ),
+                            "Register",
+                            style: TextStyle(
+                              fontSize: 80.0,
+                              fontFamily: 'Georgia',
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 150),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SizedBox(
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                width: 500,
+                                child: DropdownButtonFormField<String>(
+                                  decoration: const InputDecoration(
+                                    labelText: 'Title',
+                                    border: OutlineInputBorder(),
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                  ),
+                                  value: _title,
+                                  onChanged: (value) =>
+                                      setState(() => _title = value),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please select a title';
+                                    }
+                                    return null;
+                                  },
+                                  items: const [
+                                    DropdownMenuItem<String>(
+                                      value: 'Mr.',
+                                      child: Text('Mr.'),
+                                    ),
+                                    DropdownMenuItem<String>(
+                                      value: 'Mrs.',
+                                      child: Text('Mrs.'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: 500,
+                                child: TextFormField(
+                                  decoration: const InputDecoration(
+                                    labelText: 'First Name:',
+                                    border: OutlineInputBorder(),
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                  ),
+                                  keyboardType: TextInputType.name,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter First Name';
+                                    }
+                                    return null;
+                                  },
+                                  controller: firstname,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: 500,
+                                child: TextFormField(
+                                  decoration: const InputDecoration(
+                                    labelText: 'Last Name:',
+                                    border: OutlineInputBorder(),
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                  ),
+                                  keyboardType: TextInputType.name,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter Last Name';
+                                    }
+                                    return null;
+                                  },
+                                  controller: lastname,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: 500,
+                                child: TextFormField(
+                                  decoration: const InputDecoration(
+                                    labelText: 'User Name:',
+                                    border: OutlineInputBorder(),
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                  ),
+                                  keyboardType: TextInputType.name,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter User Name';
+                                    }
+                                    return null;
+                                  },
+                                  controller: username,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: 500,
+                                child: TextFormField(
+                                  decoration: const InputDecoration(
+                                    labelText: 'National ID Number:',
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    border: OutlineInputBorder(),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                  ),
+                                  keyboardType: TextInputType.text,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                        RegExp(r'[0-9vV]'))
+                                  ],
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter National ID Number';
+                                    }
+                                    if (!RegExp(r'^\d{12}$').hasMatch(value) &&
+                                        !RegExp(r'^\d{9}[vV]$')
+                                            .hasMatch(value)) {
+                                      return 'Enter a 12-digit number or a 9-digit number followed by V or v';
+                                    }
+                                    return null;
+                                  },
+                                  controller: nationalID,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: 500,
+                                child: TextFormField(
+                                  decoration: const InputDecoration(
+                                    labelText: 'Mobile Number:',
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    border: OutlineInputBorder(),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                  ),
+                                  keyboardType: TextInputType.phone,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter Mobile Number';
+                                    }
+                                    return null;
+                                  },
+                                  controller: mobile,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: 500,
+                                child: TextFormField(
+                                  decoration: const InputDecoration(
+                                    labelText: 'E-Mail:',
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    border: OutlineInputBorder(),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                  ),
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter E-Mail';
+                                    }
+                                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                        .hasMatch(value)) {
+                                      return 'Please enter a valid email address';
+                                    }
+                                    return null;
+                                  },
+                                  controller: email,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: 500,
+                                child: TextFormField(
+                                  decoration: const InputDecoration(
+                                    labelText: 'Password:',
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    border: OutlineInputBorder(),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                  ),
+                                  obscureText: true,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter Password';
+                                    }
+                                    return null;
+                                  },
+                                  controller: password,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: 500,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 51, 212, 37),
+                                    elevation: 20,
+                                    shadowColor:
+                                        const Color.fromARGB(255, 0, 0, 0),
+                                  ),
+                                  onPressed: () async {
+                                    if (_formKey.currentState!.validate()) {
+                                      // Create a map to store the input data
+                                      bool consent =
+                                          await _requestUserConsent();
+
+                                      if (!consent) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                "You need to consent to proceed"),
+                                          ),
+                                        );
+                                        return; // Exit if user does not consent
+                                      }
+
+                                      final Map<String, dynamic> inputData = {
+                                        'title': _title,
+                                        'first_name': firstname.text,
+                                        'last_name': lastname.text,
+                                        'user_name': username.text,
+                                        'nic': nationalID.text,
+                                        'mobile_no': mobile.text,
+                                        'email': email.text,
+                                        'password': password.text,
+                                      };
+
+                                      try {
+                                        // Make a POST request to the API endpoint
+                                        final Uri apiUrl = Uri.parse(
+                                            'http://116.12.80.92:9010/api/v3/saveOldCustomer');
+                                        final response = await http.post(
+                                          apiUrl,
+                                          headers: {
+                                            'Content-Type': 'application/json',
+                                          },
+                                          body: jsonEncode(inputData),
+                                        );
+
+                                        // Check the response status code
+                                        if (response.statusCode == 201) {
+                                          // Registration successful, show a success message
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'Registration successful!')),
+                                          );
+                                        } else {
+                                          // Registration failed, show an error message
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                                content: Text(
+                                                    'Registration failed: ${response.statusCode}')),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        // Handle potential exceptions
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'An error occurred, please try again later')),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  child: const Text(
+                                    'Register Me',
+                                    style: TextStyle(
+                                        color: Color.fromARGB(255, 0, 0, 0),
+                                        fontFamily: 'Georgia',
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
-  }
-
-  Future<void> _changePassword(String nicNumber, String newPassword) async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    final url = 'http://116.12.80.92:9010/api/v3/getBynic/$nicNumber';
-    final headers = {'Content-Type': 'application/json'};
-    final body = jsonEncode({
-      'password': newPassword,
-    });
-
-    try {
-      final response = await http.put(
-        Uri.parse(url),
-        headers: headers,
-        body: body,
-      );
-
-      if (response.statusCode == 200) {
-        // Successfully updated the password
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password changed successfully!')),
-        );
-
-        // Navigate to the Login page and replace the current route
-        Navigator.pushReplacementNamed(context, '/Login');
-      } else {
-        setState(() {
-          _errorMessage =
-              'Failed to change password. Error: ${response.statusCode}';
-        });
-      }
-    } catch (error) {
-      setState(() {
-        _errorMessage = 'An error occurred: $error';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
 }

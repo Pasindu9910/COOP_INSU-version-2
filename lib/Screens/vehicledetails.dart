@@ -39,6 +39,15 @@ class _VehicleDetailsState extends State<VehicleDetails> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      bool consent = await _requestUserConsent();
+
+      if (!consent) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("You need to consent to proceed")),
+        );
+        return;
+      }
+
       String riskName = "new " + vehicleNumberController.text;
       GlobalData.setRiskName(riskName);
 
@@ -82,6 +91,33 @@ class _VehicleDetailsState extends State<VehicleDetails> {
         );
       }
     }
+  }
+
+  Future<bool> _requestUserConsent() async {
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Data Collection Consent"),
+          content: const Text(
+              "We collect your vehicle and personal details to process your request. Your data is securely transmitted and not shared with third parties without your consent. Do you agree?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text("No"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text("Yes"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

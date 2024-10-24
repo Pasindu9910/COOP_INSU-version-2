@@ -52,10 +52,6 @@ class _LoginPageState extends State<LoginPage> {
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            // leading: IconButton(
-            //   icon: const Icon(Icons.arrow_back, color: Colors.white),
-            //   onPressed: () => Navigator.of(context).pop(),
-            // ),
           ),
           body: Center(
             child: SingleChildScrollView(
@@ -148,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                               onPressed: () async {
                                 if (_formKey.currentState?.validate() ??
                                     false) {
-                                  await _loginUser();
+                                  await _requestUserConsent();
                                 }
                               },
                               child: const Text(
@@ -207,6 +203,41 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _requestUserConsent() async {
+    bool consent = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Data Collection Consent"),
+          content: const Text(
+              "We collect your username and National ID to log you into the system. Your data is securely transmitted and not shared with any third parties without your consent. Do you agree?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text("No"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text("Yes"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!consent) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("You need to consent to data collection")),
+      );
+    } else {
+      await _loginUser();
+    }
   }
 
   Future<void> _loginUser() async {
@@ -279,7 +310,6 @@ class _LoginPageState extends State<LoginPage> {
             content: Text('An error occurred, please try again later')),
       );
     } catch (e) {
-      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('An error occurred, please try again later')),
