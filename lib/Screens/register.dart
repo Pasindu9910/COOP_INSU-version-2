@@ -36,6 +36,54 @@ class _RegisterpageState extends State<Registerpage> {
     super.dispose();
   }
 
+  void _registerUser() async {
+    // Prepare input data for registration
+    final Map<String, dynamic> inputData = {
+      'title': _title,
+      'first_name': firstname.text,
+      'last_name': lastname.text,
+      'user_name': username.text,
+      'nic': nationalID.text,
+      'mobile_no': mobile.text,
+      'email': email.text,
+      'password': password.text,
+    };
+
+    try {
+      final Uri apiUrl =
+          Uri.parse('http://124.43.209.68:9010/api/v3/saveOldCustomer');
+      final response = await http.post(
+        apiUrl,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(inputData),
+      );
+
+      // Handle registration response
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration successful!')),
+        );
+        Navigator.pushReplacementNamed(context, '/Login');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Registration failed: ${response.statusCode}'),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'An error occurred during registration, please try again later'),
+        ),
+      );
+      print("Error during registration: $e");
+    }
+  }
+
   Future<bool> _requestUserConsent() async {
     return await showDialog(
       context: context,
@@ -390,7 +438,9 @@ class _RegisterpageState extends State<Registerpage> {
                                   ),
                                   onPressed: () async {
                                     if (_formKey.currentState!.validate()) {
-                                      // Create a map to store the input data
+                                      final nic = nationalID.text;
+
+                                      // Request user consent
                                       bool consent =
                                           await _requestUserConsent();
 
@@ -405,55 +455,70 @@ class _RegisterpageState extends State<Registerpage> {
                                         return; // Exit if user does not consent
                                       }
 
-                                      final Map<String, dynamic> inputData = {
-                                        'title': _title,
-                                        'first_name': firstname.text,
-                                        'last_name': lastname.text,
-                                        'user_name': username.text,
-                                        'nic': nationalID.text,
-                                        'mobile_no': mobile.text,
-                                        'email': email.text,
-                                        'password': password.text,
-                                      };
+                                      // Prepare the URL to check NIC
+                                      final Uri checkNicUrl = Uri.parse(
+                                          'http://124.43.209.68:9010/api/v3/getBynic/$nic');
 
                                       try {
-                                        // Make a POST request to the API endpoint
-                                        final Uri apiUrl = Uri.parse(
-                                            'http://124.43.209.68:9010/api/v3/saveOldCustomer');
-                                        final response = await http.post(
-                                          apiUrl,
-                                          headers: {
-                                            'Content-Type': 'application/json',
-                                          },
-                                          body: jsonEncode(inputData),
-                                        );
+                                        final checkResponse =
+                                            await http.get(checkNicUrl);
 
-                                        // Check the response status code
-                                        if (response.statusCode == 200) {
-                                          // Registration successful, show a success message
+                                        if (checkResponse.statusCode == 200) {
+                                          final responseData =
+                                              jsonDecode(checkResponse.body);
+
+                                          // Debugging: Print the response data to the console to inspect the structure
+                                          print("Response data: $responseData");
+
+                                          // Check if 'responseData' is a list
+                                          if (responseData is List &&
+                                              responseData.isNotEmpty) {
+                                            // Loop through the list and check if any user with the same NIC exists
+                                            for (var user in responseData) {
+                                              if (user['nic'] == nic) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                        'A user with this NIC already exists.'),
+                                                  ),
+                                                );
+                                                return; // Exit, user with NIC found
+                                              }
+                                            }
+
+                                            // If no user with the same NIC is found, proceed with registration
+                                            _registerUser();
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'No user found with this NIC. Proceeding to register.'),
+                                              ),
+                                            );
+                                            _registerUser(); // Proceed with registration
+                                          }
+                                        } else {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             const SnackBar(
-                                                content: Text(
-                                                    'Registration successful!')),
-                                          );
-                                        } else {
-                                          // Registration failed, show an error message
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                                content: Text(
-                                                    'Registration failed: ${response.statusCode}')),
+                                              content: Text(
+                                                  'Error checking NIC. Please try again.'),
+                                            ),
                                           );
                                         }
                                       } catch (e) {
-                                        // Handle potential exceptions
+                                        // Catch any exceptions that occur during the request
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           const SnackBar(
-                                              content: Text(
-                                                  'An error occurred, please try again later')),
+                                            content: Text(
+                                                'An error occurred, please try again later'),
+                                          ),
                                         );
+                                        print(
+                                            "Error: $e"); // Log the error for debugging
                                       }
                                     }
                                   },
