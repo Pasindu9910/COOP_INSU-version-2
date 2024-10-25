@@ -76,11 +76,6 @@ class MyApp extends StatelessWidget {
             return _errorRoute();
         }
       },
-      onUnknownRoute: (settings) {
-        return MaterialPageRoute(
-            builder: (context) =>
-                const LoginPage()); // Redirect to Login on unknown routes
-      },
     );
   }
 
