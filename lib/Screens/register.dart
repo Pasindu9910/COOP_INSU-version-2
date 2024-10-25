@@ -517,8 +517,6 @@ class _RegisterpageState extends State<Registerpage> {
                                                 'An error occurred, please try again later'),
                                           ),
                                         );
-                                        print(
-                                            "Error: $e"); // Log the error for debugging
                                       }
                                     }
                                   },
