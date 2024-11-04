@@ -55,7 +55,6 @@ class _ChangePasswordState extends State<ChangePassword> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Use FutureBuilder to handle the image loading asynchronously
                         const SizedBox(height: 250),
                         TextFormField(
                           controller: _nicController,
