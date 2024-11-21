@@ -1,5 +1,6 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -14,6 +15,10 @@ class _AccidentReportState extends State<AccidentReport>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
+
+  final TextEditingController _otpController = TextEditingController();
+  final TextEditingController _vehicleNumberController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -31,13 +36,97 @@ class _AccidentReportState extends State<AccidentReport>
   @override
   void dispose() {
     _animationController.dispose();
+    _otpController.dispose();
+    _vehicleNumberController.dispose();
     super.dispose();
+  }
+
+  String? _validateVehicleNumber(String value) {
+    if (value.isEmpty) {
+      return 'Please enter the vehicle number';
+    }
+    if (!RegExp(r'^[A-Z]{1,2}\s?[A-Z]{2,3}\s?-?\s?\d{4}$').hasMatch(value)) {
+      return 'Please enter a valid vehicle number (e.g., NW CBB-1226 or CBB 1226)';
+    }
+    return null;
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
     final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
-
     launchUrl(phoneUri);
+  }
+
+  Future<void> _verifyOtpAndNavigate() async {
+    String? vehicleError =
+        _validateVehicleNumber(_vehicleNumberController.text);
+
+    if (_otpController.text.isEmpty) {
+      _showErrorDialog('Please enter the OTP code.');
+      return;
+    }
+
+    if (vehicleError != null) {
+      _showErrorDialog(vehicleError);
+      return;
+    }
+
+    // Show loading indicator while checking the OTP
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://124.43.209.68:9000/api/v4/getByVehiclenumber'),
+        body: json.encode({
+          'otp': _otpController.text,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['status'] == 'success') {
+          GlobalData.setVehicleNumber(_vehicleNumberController.text);
+
+          Navigator.pop(context);
+          Navigator.pushNamed(context, '/onsite');
+        } else {
+          Navigator.pop(context);
+          _showErrorDialog('Invalid OTP. Please try again.');
+        }
+      } else {
+        Navigator.pop(context);
+        _showErrorDialog('Failed to validate OTP. Please try again later.');
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      _showErrorDialog('Network error. Please check your connection.');
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -65,100 +154,124 @@ class _AccidentReportState extends State<AccidentReport>
                 ),
               ),
             ),
-            Column(
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 40.0, bottom: 20.0),
-                  child: Text(
-                    'Click to get connected with call center',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(height: 70),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
                   children: [
-                    ScaleTransition(
-                      scale: _animation,
-                      child: InkWell(
-                        onTap: () => _makePhoneCall('0117440033'),
-                        child: Image.asset(
-                          'assets/callus.png',
-                          width: 150,
-                          height: 150,
+                    const Padding(
+                      padding: EdgeInsets.only(top: 40.0, bottom: 20.0),
+                      child: Text(
+                        'Click to get connected with call center',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                    const SizedBox(width: 30),
-                    const Text(
-                      '0117440033',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(height: 40),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ScaleTransition(
+                          scale: _animation,
+                          child: InkWell(
+                            onTap: () => _makePhoneCall('0117440033'),
+                            child: Image.asset(
+                              'assets/callus.png',
+                              width: 150,
+                              height: 150,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 30),
+                        const Text(
+                          '0117440033',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ScaleTransition(
+                          scale: _animation,
+                          child: InkWell(
+                            onTap: () => _makePhoneCall('0112440033'),
+                            child: Image.asset(
+                              'assets/callus.png',
+                              width: 150,
+                              height: 150,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        const Text(
+                          '0112440033',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
+                    TextField(
+                      controller: _otpController,
+                      decoration: InputDecoration(
+                        labelText: 'Enter OTP Code',
+                        border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _vehicleNumberController,
+                      decoration: InputDecoration(
+                        labelText: 'Enter Vehicle Number',
+                        hintText: 'E.g. NW CBB-1226 or CBB 1226',
+                        border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    SizedBox(
+                      width: 250,
+                      height: 60,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          backgroundColor: Colors.green,
+                          elevation: 10,
+                          shadowColor: Colors.grey,
+                        ),
+                        onPressed: _verifyOtpAndNavigate,
+                        child: const Text(
+                          'Onsite Inspections',
+                          style: TextStyle(
+                            fontFamily: 'Georgia',
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ScaleTransition(
-                      scale: _animation,
-                      child: InkWell(
-                        onTap: () => _makePhoneCall('0112440033'),
-                        child: Image.asset(
-                          'assets/callus.png',
-                          width: 150,
-                          height: 150,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    const Text(
-                      '0112440033',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-                SizedBox(
-                  width: 250,
-                  height: 60,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      backgroundColor: Colors.green,
-                      elevation: 10,
-                      shadowColor: Colors.grey,
-                    ),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/onsite');
-                    },
-                    child: const Text(
-                      'Onsite Inspections',
-                      style: TextStyle(
-                        fontFamily: 'Georgia',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),
