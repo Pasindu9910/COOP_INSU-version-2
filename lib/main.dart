@@ -3,7 +3,7 @@ import 'package:customer_portal/Screens/changepassword.dart';
 import 'package:customer_portal/Screens/menu.dart';
 import 'package:customer_portal/Screens/decision.dart';
 import 'package:customer_portal/Screens/login.dart';
-import 'package:customer_portal/Screens/onsiteinspection.dart';
+import 'package:customer_portal/Screens/accidentphotos.dart';
 import 'package:customer_portal/Screens/ownersvehicle.dart';
 import 'package:customer_portal/Screens/policyinfo.dart';
 import 'package:customer_portal/Screens/register.dart';

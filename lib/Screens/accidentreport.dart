@@ -84,7 +84,7 @@ class _AccidentReportState extends State<AccidentReport>
       final response = await http.post(
         Uri.parse('http://124.43.209.68:9000/api/v4/getByVehiclenumber'),
         body: json.encode({
-          'otp': _otpController.text,
+          'jobno': _otpController.text,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ class _AccidentReportState extends State<AccidentReport>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Error'),
+          title: const Text('Missing Informations'),
           content: Text(message),
           actions: <Widget>[
             TextButton(
