@@ -89,210 +89,204 @@ class _ChoicesPageState extends State<ChoicesPage> {
                     leading: Icon(Icons.home),
                     title: Text('Home'),
                     onTap: () {
-                      Navigator.pop(context); // Close the drawer
+                      Navigator.pop(context);
                     },
                   ),
                   ListTile(
                     leading: Icon(Icons.logout),
                     title: Text('Logout'),
                     onTap: () {
-                      // Handle logout action here
-                     Navigator.pushNamedAndRemoveUntil(
-                        context, 
-                        '/Login', 
-                        ModalRoute.withName('/decision'), // Keeps '/decision' in the stack
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/Login',
+                        ModalRoute.withName('/decision'),
                       );
-                      // You could also implement a logout function here
                     },
                   ),
                 ],
               ),
             ),
             body: TabBarView(
-                  children: [
-                    // Services tab content
-                    Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage('assets/background2.png'),
-                          fit: BoxFit.cover,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/background2.png'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: SizedBox(
+                            height: 150,
+                            child: _buildFullWidthButton(
+                              context,
+                              'New Policy',
+                              '/Inspection',
+                              imagePath: 'assets/protection.png',
+                            ),
+                          ),
                         ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: SizedBox(
+                            height: 150,
+                            child: _buildFullWidthButton(
+                              context,
+                              'Accident Report',
+                              '/Accident',
+                              imagePath: 'assets/crash.png',
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Expanded(
+                          child: GridView.count(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 20,
+                            crossAxisSpacing: 20,
+                            childAspectRatio: 1.2,
+                            children: [
+                              _buildButton(
+                                context,
+                                'Policy Information',
+                                '/Policyinfo',
+                                imagePath: 'assets/policy.png',
+                                nicNumber: widget.nicNumber,
+                              ),
+                              _buildButton(
+                                context,
+                                'ARI',
+                                imagePath: 'assets/insurance.png',
+                                null,
+                              ),
+                              _buildButton(
+                                context,
+                                'Third Party renewal',
+                                null,
+                                imagePath: 'assets/renewal.png',
+                                url: 'https://online.ci.lk/third_party/',
+                              ),
+                              _buildButton(
+                                context,
+                                'Premium payment',
+                                null,
+                                imagePath: 'assets/pay.png',
+                                url: 'https://online.ci.lk/general/',
+                              ),
+                              _buildButton(
+                                context,
+                                'Quotation',
+                                null,
+                                imagePath: 'assets/pay.png',
+                                url: 'https://ci.lk/getamotorquote/',
+                              ),
+                              _buildButton(
+                                context,
+                                'Customer feedback',
+                                null,
+                                imagePath: 'assets/customer.png',
+                                url: 'https://ci.lk/complaint/ ',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // About Us tab content
+                Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/background2.png'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Stack(
+                    children: [
+                      SingleChildScrollView(
+                        padding: EdgeInsets.all(20),
                         child: Column(
                           children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 10.0),
-                              child: SizedBox(
-                                height: 150,
-                                child: _buildFullWidthButton(
-                                  context,
-                                  'New Policy',
-                                  '/Inspection',
-                                  imagePath: 'assets/protection.png',
+                            Center(
+                              child: Text(
+                                "About Us",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontFamily: 'Georgia',
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 10.0),
-                              child: SizedBox(
-                                height: 150,
-                                child: _buildFullWidthButton(
-                                  context,
-                                  'Accident Report',
-                                  '/Accident',
-                                  imagePath: 'assets/crash.png',
-                                ),
-                              ),
+                            SizedBox(height: 20),
+                            _buildTile(
+                              title: "Co-operative Insurance Company PLC",
+                              content:
+                                  "Incorporated in Sri Lanka in 1999. Licensed as a company authorized to carry out insurance business under the Control of Insurance Act No. 25 of 1962 as amended by Act No. 42 of 1986 (presently replaced by Regulation of Insurance Industry Act No. 43 of 2000). We are one of the leading insurers who provide innovative insurance solutions across all lines of business, with the third-largest network in Sri Lanka.",
                             ),
-                            SizedBox(height: 10),
-                            Expanded(
-                              child: GridView.count(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 20,
-                                crossAxisSpacing: 20,
-                                childAspectRatio: 1.2,
-                                children: [
-                                  _buildButton(
-                                    context,
-                                    'Policy Information',
-                                    '/Policyinfo',
-                                    imagePath: 'assets/policy.png',
-                                    nicNumber: widget.nicNumber,
-                                  ),
-                                  _buildButton(
-                                    context,
-                                    'ARI',
-                                    imagePath: 'assets/insurance.png',
-                                    null,
-                                  ),
-                                  _buildButton(
-                                    context,
-                                    'Third Party renewal',
-                                    null,
-                                    imagePath: 'assets/renewal.png',
-                                    url: 'https://online.ci.lk/third_party/',
-                                  ),
-                                  _buildButton(
-                                    context,
-                                    'Premium payment',
-                                    null,
-                                    imagePath: 'assets/pay.png',
-                                    url: 'https://online.ci.lk/general/',
-                                  ),
-                                  _buildButton(
-                                    context,
-                                    'Quotation',
-                                    null,
-                                    imagePath: 'assets/pay.png',
-                                    url: 'https://ci.lk/getamotorquote/',
-                                  ),
-                                  _buildButton(
-                                    context,
-                                    'Customer feedback',
-                                    null,
-                                    imagePath: 'assets/customer.png',
-                                    url: 'https://ci.lk/complaint/ ',
-                                  ),
-                                ],
-                              ),
+                            _buildTile(
+                              title: "History",
+                              content:
+                                  "In 1999, Co-operative Insurance Company PLC (CICPLC) was established by the co-operative movement with great prospects. More than 2 decades and numerous challenges later, CICPLC is one of the largest and fastest-growing companies in Sri Lanka.\n\nAs a customer-centric and people-driven organization, we inspire our stakeholders to be proactive and innovative. Our utmost convenient solutions set us apart from other orthodox entities in the industry.",
+                            ),
+                            _buildTile(
+                              title: "Vision",
+                              content:
+                                  "“To be an organization that will stand 'united' with its customers to the very end.”",
+                            ),
+                            _buildTile(
+                              title: "Mission",
+                              content:
+                                  "“To be ever mindful of the needs of our customers and thereby make 'true protection' via the provision of innovative, yet affordable insurance solutions which conform to the highest ethical and moral standards.”",
+                            ),
+                            _buildTile(
+                              title: "Values",
+                              content:
+                                  "R - Respect - Respectful when REACT\nE - Ethical - Ethical when REACT\nA - Accountable - Accountable when REACT\nC - Commitment - Committed when REACT\nT - Trust - Trustworthy when REACT",
                             ),
                           ],
                         ),
                       ),
-                    ),
-                    // About Us tab content
-                    Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage('assets/background2.png'),
-                          fit: BoxFit.cover,
+                      Positioned(
+                        right: 16,
+                        bottom: 50,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            _buildSocialButton('assets/youtube.png', () async {
+                              launch(
+                                  'https://www.youtube.com/channel/UC6-Ex5c_AFfBi7mJxP6dsIw');
+                            }),
+                            SizedBox(height: 16),
+                            _buildSocialButton(
+                              'assets/linkedin.png',
+                              () async {
+                                launch(
+                                    'https://www.linkedin.com/company/co-operative-insurance/');
+                              },
+                            ),
+                            SizedBox(height: 16),
+                            _buildSocialButton(
+                              'assets/facebook.png',
+                              () async {
+                                launch(
+                                    'https://www.facebook.com/Coperativeinsurance/');
+                              },
+                            ),
+                          ],
                         ),
                       ),
-                      child: Stack(
-                        children: [
-                          SingleChildScrollView(
-                            padding: EdgeInsets.all(20),
-                            child: Column(
-                              children: [
-                                Center(
-                                  child: Text(
-                                    "About Us",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24,
-                                      fontFamily: 'Georgia',
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 20),
-                                _buildTile(
-                                  title: "Co-operative Insurance Company PLC",
-                                  content:
-                                      "Incorporated in Sri Lanka in 1999. Licensed as a company authorized to carry out insurance business under the Control of Insurance Act No. 25 of 1962 as amended by Act No. 42 of 1986 (presently replaced by Regulation of Insurance Industry Act No. 43 of 2000). We are one of the leading insurers who provide innovative insurance solutions across all lines of business, with the third-largest network in Sri Lanka.",
-                                ),
-                                _buildTile(
-                                  title: "History",
-                                  content:
-                                      "In 1999, Co-operative Insurance Company PLC (CICPLC) was established by the co-operative movement with great prospects. More than 2 decades and numerous challenges later, CICPLC is one of the largest and fastest-growing companies in Sri Lanka.\n\nAs a customer-centric and people-driven organization, we inspire our stakeholders to be proactive and innovative. Our utmost convenient solutions set us apart from other orthodox entities in the industry.",
-                                ),
-                                _buildTile(
-                                  title: "Vision",
-                                  content:
-                                      "“To be an organization that will stand 'united' with its customers to the very end.”",
-                                ),
-                                _buildTile(
-                                  title: "Mission",
-                                  content:
-                                      "“To be ever mindful of the needs of our customers and thereby make 'true protection' via the provision of innovative, yet affordable insurance solutions which conform to the highest ethical and moral standards.”",
-                                ),
-                                _buildTile(
-                                  title: "Values",
-                                  content:
-                                      "R - Respect - Respectful when REACT\nE - Ethical - Ethical when REACT\nA - Accountable - Accountable when REACT\nC - Commitment - Committed when REACT\nT - Trust - Trustworthy when REACT",
-                                ),
-                              ],
-                            ),
-                          ),
-                          Positioned(
-                            right: 16,
-                            bottom: 50,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                _buildSocialButton('assets/youtube.png',
-                                    () async {
-                                  launch(
-                                      'https://www.youtube.com/channel/UC6-Ex5c_AFfBi7mJxP6dsIw');
-                                }),
-                                SizedBox(height: 16),
-                                _buildSocialButton(
-                                  'assets/linkedin.png',
-                                  () async {
-                                    launch(
-                                        'https://www.linkedin.com/company/co-operative-insurance/');
-                                  },
-                                ),
-                                SizedBox(height: 16),
-                                _buildSocialButton(
-                                  'assets/facebook.png',
-                                  () async {
-                                    launch(
-                                        'https://www.facebook.com/Coperativeinsurance/');
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+              ],
+            ),
           ),
         ),
       ),
@@ -302,10 +296,10 @@ class _ChoicesPageState extends State<ChoicesPage> {
   Widget _buildFullWidthButton(BuildContext context, String text, String? route,
       {String? imagePath, String? nicNumber, String? url}) {
     return SizedBox(
-      width: double.infinity, // Full width
+      width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(vertical: 20), // Adjust button padding
+          padding: EdgeInsets.symmetric(vertical: 20),
           backgroundColor: Color.fromARGB(255, 255, 255, 255),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),

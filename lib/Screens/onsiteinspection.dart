@@ -15,14 +15,15 @@ class OnsiteInspection extends StatefulWidget {
 }
 
 class _OnsiteInspectionState extends State<OnsiteInspection> {
-  String? riskName = GlobalData.getRiskName();
+  String? riskName = GlobalData.getVehicleNumber();
+  String? oTPnumber = GlobalData.getOTPNumber();
   static const double buttonWidth = 150;
   static const double buttonHeight = 100;
   static const double fontSize = 14;
   static const double spacing = 30;
 
   final ImagePicker _picker = ImagePicker();
-  final Map<String, List<File>> _capturedPhotos = {}; // Store lists of images
+  final Map<String, List<File>> _capturedPhotos = {};
   final Map<String, Color> _buttonColors = {};
   final List<String> _allButtonLabels = [
     'Accident Photos',
@@ -310,11 +311,10 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
         );
       }
     } else {
-      // For other buttons, capture only one image
       await _captureNewImage(buttonText);
 
       setState(() {
-        _buttonColors[buttonText] = Colors.green; // Mark as done
+        _buttonColors[buttonText] = Colors.green;
       });
     }
   }
@@ -357,7 +357,13 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
   }
 
   Future<void> _sendImages() async {
-    String? riskName = GlobalData.getRiskName();
+    String? riskName = GlobalData.getVehicleNumber();
+    String? jobId = GlobalData.getOTPNumber();
+
+    if (riskName == null || jobId == null) {
+      _showErrorDialog('Risk Name or Job ID is missing.');
+      return;
+    }
 
     _showProgressPopup(context);
 
@@ -373,24 +379,27 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
         for (var file in files) {
           final request = http.MultipartRequest(
             'POST',
-            Uri.parse('http://124.43.209.68:9000/api/v1/upload'),
+            Uri.parse('http://124.43.209.68:9000/api/v1/uploadaccident'),
           );
 
           request.files
               .add(await http.MultipartFile.fromPath('files', file.path));
-          request.fields['buttonName'] = buttonName;
-          request.fields['riskName'] = riskName ?? '';
+          request.fields['riskid'] = riskName;
+          request.fields['jobid'] = jobId;
 
           final response = await request.send();
 
           if (response.statusCode != 200) {
             _showErrorDialog('Failed to send $buttonName image.');
+            break;
           }
         }
       }
 
       _showSuccessDialog();
-      GlobalData.setRiskName('');
+      GlobalData.setVehicleNumber('');
+      GlobalData.setOTPNumber('');
+      GlobalData.setOTPNumber('');
       _resetState();
     } catch (e) {
       _showErrorDialog('An error occurred while sending images.');

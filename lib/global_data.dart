@@ -2,6 +2,7 @@ class GlobalData {
   static String? selectedRiskName;
   static String? loggedInUserName;
   static String? vehicleNumber;
+  static String? oTPNumber;
 
   static void setRiskName(String riskName) {
     selectedRiskName = riskName;
@@ -23,13 +24,22 @@ class GlobalData {
     vehicleNumber = number;
   }
 
-  static String? getVehicleNumber(String text) {
+  static String? getVehicleNumber() {
     return vehicleNumber;
+  }
+
+  static void setOTPNumber(String oTP) {
+    oTPNumber = oTP;
+  }
+
+  static String? getOTPNumber() {
+    return oTPNumber;
   }
 
   static void clearUserData() {
     selectedRiskName = null;
     loggedInUserName = null;
     vehicleNumber = null;
+    oTPNumber = null;
   }
 }

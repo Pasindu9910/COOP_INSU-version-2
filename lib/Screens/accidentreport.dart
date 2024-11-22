@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:customer_portal/global_data.dart';
@@ -70,7 +72,6 @@ class _AccidentReportState extends State<AccidentReport>
       return;
     }
 
-    // Show loading indicator while checking the OTP
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -94,6 +95,7 @@ class _AccidentReportState extends State<AccidentReport>
         final responseData = json.decode(response.body);
         if (responseData['status'] == 'success') {
           GlobalData.setVehicleNumber(_vehicleNumberController.text);
+          GlobalData.setOTPNumber(_otpController.text);
 
           Navigator.pop(context);
           Navigator.pushNamed(context, '/onsite');
