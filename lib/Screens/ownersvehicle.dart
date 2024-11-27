@@ -217,6 +217,12 @@ class _OwnervehicleState extends State<Ownervehicle> {
                         ),
                         onPressed: isProceedEnabled
                             ? () {
+                                // Store selected vehicle in GlobalData
+                                final selectedVehicle = _vehicleList.firstWhere(
+                                    (vehicle) =>
+                                        vehicle.id == _selectedVehicleId);
+                                GlobalData.setRiskName(selectedVehicle.name);
+
                                 Navigator.pushNamed(
                                   context,
                                   '/Choises',

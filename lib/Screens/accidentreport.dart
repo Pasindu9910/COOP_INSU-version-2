@@ -59,6 +59,7 @@ class _AccidentReportState extends State<AccidentReport>
   }
 
   Future<void> _verifyOtpAndNavigate() async {
+    // Validate the entered vehicle number
     String? vehicleError =
         _validateVehicleNumber(_vehicleNumberController.text);
 
@@ -69,6 +70,24 @@ class _AccidentReportState extends State<AccidentReport>
 
     if (vehicleError != null) {
       _showErrorDialog(vehicleError);
+      return;
+    }
+
+    // Fetch and normalize the stored risk name from GlobalData
+    final String? storedRiskName =
+        GlobalData.getRiskName()?.replaceAll(RegExp(r'\s+'), ' ').trim();
+    print(
+        'Normalized Stored Risk Name from GlobalData: $storedRiskName'); // Debug statement
+
+    // Normalize the entered vehicle number
+    final String enteredVehicleNumber =
+        _vehicleNumberController.text.replaceAll(RegExp(r'\s+'), ' ').trim();
+    print(
+        'Normalized Entered Vehicle Number: $enteredVehicleNumber'); // Debug statement
+
+    if (storedRiskName == null || storedRiskName != enteredVehicleNumber) {
+      _showErrorDialog(
+          'The entered vehicle number does not match the selected vehicle. Please try again.');
       return;
     }
 
