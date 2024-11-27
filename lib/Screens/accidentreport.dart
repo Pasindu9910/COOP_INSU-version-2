@@ -72,6 +72,13 @@ class _AccidentReportState extends State<AccidentReport>
       return;
     }
 
+    // Example: Replace with actual ID or vehicle number as required
+    final String otpnumber = _otpController.text;
+
+    // Construct the URL with the dynamic path parameter
+    final Uri apiUrl = Uri.parse(
+        'http://124.43.209.68:9010/api/v3/getBynic/$otpnumber?jobno=$otpnumber');
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -81,18 +88,15 @@ class _AccidentReportState extends State<AccidentReport>
     );
 
     try {
-      final response = await http.post(
-        Uri.parse('http://124.43.209.68:9000/api/v4/getByVehiclenumber'),
-        body: json.encode({
-          'jobno': _otpController.text,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
+      // Send GET request to the API
+      final response = await http.get(apiUrl, headers: {
+        'Content-Type': 'application/json',
+      });
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
+
+        // Assuming the API responds with a success status
         if (responseData['status'] == 'success') {
           GlobalData.setVehicleNumber(_vehicleNumberController.text);
           GlobalData.setOTPNumber(_otpController.text);
