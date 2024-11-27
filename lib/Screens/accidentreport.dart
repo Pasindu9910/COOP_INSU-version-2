@@ -72,12 +72,11 @@ class _AccidentReportState extends State<AccidentReport>
       return;
     }
 
-    // Example: Replace with actual ID or vehicle number as required
     final String otpnumber = _otpController.text;
 
     // Construct the URL with the dynamic path parameter
     final Uri apiUrl = Uri.parse(
-        'http://124.43.209.68:9010/api/v3/getBynic/$otpnumber?jobno=$otpnumber');
+        'http://124.43.209.68:9010/api/v4/getByJobNum/$otpnumber?jobno=$otpnumber');
 
     showDialog(
       context: context,
@@ -88,7 +87,6 @@ class _AccidentReportState extends State<AccidentReport>
     );
 
     try {
-      // Send GET request to the API
       final response = await http.get(apiUrl, headers: {
         'Content-Type': 'application/json',
       });
@@ -96,7 +94,6 @@ class _AccidentReportState extends State<AccidentReport>
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
 
-        // Assuming the API responds with a success status
         if (responseData['status'] == 'success') {
           GlobalData.setVehicleNumber(_vehicleNumberController.text);
           GlobalData.setOTPNumber(_otpController.text);
@@ -108,6 +105,7 @@ class _AccidentReportState extends State<AccidentReport>
           _showErrorDialog('Invalid OTP. Please try again.');
         }
       } else {
+        print('Error: API response status code ${response.statusCode}.');
         Navigator.pop(context);
         _showErrorDialog('Failed to validate OTP. Please try again later.');
       }
