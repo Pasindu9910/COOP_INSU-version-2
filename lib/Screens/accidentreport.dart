@@ -88,10 +88,11 @@ class _AccidentReportState extends State<AccidentReport>
     }
 
     final String otpnumber = _otpController.text;
+    final String jobName = Uri.encodeComponent('Onsite Inspection');
 
-    // Construct the URL with the correct parameters
+    // Construct the URL dynamically with parameters
     final Uri apiUrl = Uri.parse(
-        'http://172.20.11.162:8001/CoopCare/OTPConfirm?jobName=Onsite%20Inspection&jobNo=$otpnumber');
+        'http://124.43.209.68:9000/api/v1/getJobDetails/$jobName/$otpnumber');
 
     showDialog(
       context: context,
