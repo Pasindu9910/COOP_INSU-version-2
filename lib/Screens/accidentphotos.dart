@@ -15,7 +15,7 @@ class OnsiteInspection extends StatefulWidget {
 }
 
 class _OnsiteInspectionState extends State<OnsiteInspection> {
-  String? riskName = GlobalData.getVehicleNumber();
+  String? riskName = GlobalData.getRiskName();
   String? oTPnumber = GlobalData.getOTPNumber();
   static const double buttonWidth = 150;
   static const double buttonHeight = 100;
@@ -152,11 +152,10 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
                 right: 0,
                 child: Center(
                   child: ElevatedButton(
-                    onPressed: allImagesCaptured ? _sendImages : null,
+                    onPressed: _sendImages,
                     style: ElevatedButton.styleFrom(
                       fixedSize: Size(200, 50),
-                      backgroundColor:
-                          allImagesCaptured ? Colors.green : Colors.grey,
+                      backgroundColor: Colors.green,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -357,7 +356,7 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
   }
 
   Future<void> _sendImages() async {
-    String? riskName = GlobalData.getVehicleNumber();
+    String? riskName = GlobalData.getRiskName();
     String? jobId = GlobalData.getOTPNumber();
 
     if (riskName == null || jobId == null) {
@@ -372,6 +371,8 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
     });
 
     try {
+      bool allUploadsSuccessful = true;
+
       for (var entry in _capturedPhotos.entries) {
         final buttonName = entry.key;
         final files = entry.value;
@@ -390,18 +391,23 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
           final response = await request.send();
 
           if (response.statusCode != 200) {
+            allUploadsSuccessful = false;
             _showErrorDialog('Failed to send $buttonName image.');
             break;
           }
         }
+        if (!allUploadsSuccessful) break;
       }
 
-      _showSuccessDialog();
-      GlobalData.setVehicleNumber('');
-      GlobalData.setOTPNumber('');
-      GlobalData.setOTPNumber('');
-      _resetState();
+      Navigator.of(context).pop(); // Close the progress dialog
+      if (allUploadsSuccessful) {
+        _showSuccessDialog(); // Only show success dialog if all uploads succeed
+        GlobalData.setRiskName('');
+        GlobalData.setOTPNumber('');
+        _resetState();
+      }
     } catch (e) {
+      Navigator.of(context).pop(); // Close the progress dialog
       _showErrorDialog('An error occurred while sending images.');
     } finally {
       setState(() {

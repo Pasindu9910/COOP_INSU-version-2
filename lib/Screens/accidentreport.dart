@@ -19,8 +19,6 @@ class _AccidentReportState extends State<AccidentReport>
   late Animation<double> _animation;
 
   final TextEditingController _otpController = TextEditingController();
-  final TextEditingController _vehicleNumberController =
-      TextEditingController();
 
   @override
   void initState() {
@@ -39,18 +37,7 @@ class _AccidentReportState extends State<AccidentReport>
   void dispose() {
     _animationController.dispose();
     _otpController.dispose();
-    _vehicleNumberController.dispose();
     super.dispose();
-  }
-
-  String? _validateVehicleNumber(String value) {
-    if (value.isEmpty) {
-      return 'Please enter the vehicle number';
-    }
-    if (!RegExp(r'^[A-Z]{1,2}\s?[A-Z]{2,3}\s?-?\s?\d{4}$').hasMatch(value)) {
-      return 'Please enter a valid vehicle number (e.g., NW CBB-1226 or CBB 1226)';
-    }
-    return null;
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
@@ -59,40 +46,15 @@ class _AccidentReportState extends State<AccidentReport>
   }
 
   Future<void> _verifyOtpAndNavigate() async {
-    // Validate the entered vehicle number
-    String? vehicleError =
-        _validateVehicleNumber(_vehicleNumberController.text);
-
     if (_otpController.text.isEmpty) {
       _showErrorDialog('Please enter the OTP code.');
       return;
     }
 
-    if (vehicleError != null) {
-      _showErrorDialog(vehicleError);
-      return;
-    }
+    final String enteredOtp = _otpController.text;
 
-    // Fetch and normalize the stored risk name from GlobalData
-    final String? storedRiskName =
-        GlobalData.getRiskName()?.replaceAll(RegExp(r'\s+'), ' ').trim();
-
-    // Normalize the entered vehicle number
-    final String enteredVehicleNumber =
-        _vehicleNumberController.text.replaceAll(RegExp(r'\s+'), ' ').trim();
-
-    if (storedRiskName == null || storedRiskName != enteredVehicleNumber) {
-      _showErrorDialog(
-          'The entered vehicle number does not match the selected vehicle. Please try again.');
-      return;
-    }
-
-    final String otpnumber = _otpController.text;
-    final String jobName = Uri.encodeComponent('Onsite Inspection');
-
-    // Construct the URL dynamically with parameters
     final Uri apiUrl = Uri.parse(
-        'http://124.43.209.68:9000/api/v1/getJobDetails/$jobName/$otpnumber');
+        'http://124.43.209.68:9000/api/v1/getJobDetails/Onsite%Inspection/$enteredOtp');
 
     showDialog(
       context: context,
@@ -110,22 +72,28 @@ class _AccidentReportState extends State<AccidentReport>
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
 
-        if (responseData['status'] == 'success') {
-          GlobalData.setVehicleNumber(_vehicleNumberController.text);
+        // Assuming the API returns the OTP in a field called 'otp'
+        final String apiOtp = responseData['jobNumber'] ?? '';
+
+        if (enteredOtp == apiOtp) {
+          // OTP matches, proceed with navigation
           GlobalData.setOTPNumber(_otpController.text);
 
           Navigator.pop(context);
           Navigator.pushNamed(context, '/onsite');
         } else {
+          // OTP does not match
           Navigator.pop(context);
-          _showErrorDialog('Invalid OTP. Please try again.');
+          _showErrorDialog('The entered OTP is incorrect. Please try again.');
         }
       } else {
         print('Error: API response status code ${response.statusCode}.');
+        print('API Error Body: ${response.body}');
         Navigator.pop(context);
         _showErrorDialog('Failed to validate OTP. Please try again later.');
       }
     } catch (e) {
+      print('Exception occurred: $e');
       Navigator.pop(context);
       _showErrorDialog('Network error. Please check your connection.');
     }
@@ -136,7 +104,7 @@ class _AccidentReportState extends State<AccidentReport>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Missing Informations'),
+          title: const Text('Something went wrong!'),
           content: Text(message),
           actions: <Widget>[
             TextButton(
@@ -247,23 +215,22 @@ class _AccidentReportState extends State<AccidentReport>
                     TextField(
                       controller: _otpController,
                       decoration: InputDecoration(
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
                         labelText: 'Enter OTP Code',
+                        labelStyle: TextStyle(
+                          color: Colors.white, // Set label text color to white
+                        ),
                         border: OutlineInputBorder(),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Colors.transparent,
                       ),
                     ),
                     const SizedBox(height: 20),
-                    TextField(
-                      controller: _vehicleNumberController,
-                      decoration: InputDecoration(
-                        labelText: 'Enter Vehicle Number',
-                        hintText: 'E.g. NW CBB-1226 or CBB 1226',
-                        border: OutlineInputBorder(),
-                        filled: true,
-                        fillColor: Colors.white,
-                      ),
-                    ),
                     const SizedBox(height: 40),
                     SizedBox(
                       width: 250,

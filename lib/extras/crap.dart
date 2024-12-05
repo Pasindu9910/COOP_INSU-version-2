@@ -1,61 +1,353 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, prefer_const_literals_to_create_immutables
 
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
+import 'dart:io';
+import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 
-class Registerpage extends StatefulWidget {
-  const Registerpage({super.key});
+class OnsiteInspection extends StatefulWidget {
+  const OnsiteInspection({super.key});
 
   @override
-  State<Registerpage> createState() => _RegisterpageState();
+  State<OnsiteInspection> createState() => _OnsiteInspectionState();
 }
 
-class _RegisterpageState extends State<Registerpage> {
-  final _formKey = GlobalKey<FormState>();
-  String? _title;
-  final firstname = TextEditingController();
-  final lastname = TextEditingController();
-  final username = TextEditingController();
-  final nationalID = TextEditingController();
-  final mobile = TextEditingController();
-  final email = TextEditingController();
-  final password = TextEditingController();
+class _OnsiteInspectionState extends State<OnsiteInspection> {
+  String? riskName = GlobalData.getRiskName();
+  String? oTPnumber = GlobalData.getOTPNumber();
+  static const double buttonWidth = 150;
+  static const double buttonHeight = 100;
+  static const double fontSize = 14;
+  static const double spacing = 30;
+
+  final ImagePicker _picker = ImagePicker();
+  final Map<String, List<File>> _capturedPhotos = {};
+  final Map<String, Color> _buttonColors = {};
+  final List<String> _allButtonLabels = [
+    'Accident Photos',
+    'Front NIC Photo',
+    'License Photo Front',
+    'License Photo Back',
+    'Meter Reader',
+    'Back NIC Photo',
+    'Vehicle Book\nPhoto',
+    'Chassi Number',
+    'Wind Screen\nLabel',
+  ];
+
+  bool _isLoading = false;
 
   @override
-  void dispose() {
-    firstname.dispose();
-    lastname.dispose();
-    username.dispose();
-    nationalID.dispose();
-    mobile.dispose();
-    email.dispose();
-    password.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    for (var label in _allButtonLabels) {
+      _buttonColors[label] = Colors.white;
+      _capturedPhotos[label] = []; // Initialize with empty lists
+    }
   }
 
-  Future<bool> _requestUserConsent() async {
-    return await showDialog(
+  bool get allImagesCaptured =>
+      _capturedPhotos.values.every((files) => files.isNotEmpty) &&
+      _buttonColors.values.every((color) => color != Colors.red);
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/background2.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: Text(
+              'Onsite Vehicle Inspection',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'Georgia',
+              ),
+            ),
+            backgroundColor: Color.fromARGB(255, 0, 68, 124),
+          ),
+          body: Stack(
+            children: [
+              SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 80.0),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30.0),
+                      child: Text(
+                        'Inspect Your Vehicle',
+                        style: TextStyle(
+                          shadows: [
+                            Shadow(
+                              blurRadius: 5.0,
+                              color: Colors.black,
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontFamily: 'Georgia',
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildColumnWithButtons(
+                            [
+                              'Accident Photos',
+                              'Front NIC Photo',
+                              'License Photo Front',
+                              'Meter Reader',
+                            ],
+                            [
+                              () => _openCamera('Accident Photos'),
+                              () => _openCamera('Front NIC Photo'),
+                              () => _openCamera('License Photo Front'),
+                              () => _openCamera('Meter Reader'),
+                            ],
+                          ),
+                          _buildColumnWithButtons(
+                            [
+                              'Chassi Number',
+                              'Back NIC Photo',
+                              'License Photo Back',
+                              'Wind Screen\nLabel',
+                            ],
+                            [
+                              () => _openCamera('Chassi Number'),
+                              () => _openCamera('Back NIC Photo'),
+                              () => _openCamera('License Photo Back'),
+                              () => _openCamera('Wind Screen\nLabel'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 40),
+                  ],
+                ),
+              ),
+              Positioned(
+                bottom: 20,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: _sendImages,
+                    style: ElevatedButton.styleFrom(
+                      fixedSize: Size(200, 50),
+                      backgroundColor: Colors.green,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      'Send',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontFamily: 'Georgia',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (_isLoading)
+                Center(
+                  child: CircularProgressIndicator(),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Column _buildColumnWithButtons(
+      List<String> buttonTexts, List<VoidCallback> onPressedFunctions) {
+    List<Widget> buttonsWithSpacing = [];
+    for (int i = 0; i < buttonTexts.length; i++) {
+      buttonsWithSpacing.add(
+        _buildElevatedButton(buttonTexts[i], onPressedFunctions[i]),
+      );
+      if (i < buttonTexts.length - 1) {
+        buttonsWithSpacing.add(SizedBox(height: spacing));
+      }
+    }
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: buttonsWithSpacing);
+  }
+
+  ElevatedButton _buildElevatedButton(String text, VoidCallback onPressed) {
+    final Map<String, String> buttonImages = {
+      'Accident Photos': 'assets/front1.png',
+      'Front NIC Photo': 'assets/ID.png',
+      'License Photo Front': 'assets/lis.png',
+      'License Photo Back': 'assets/lis.png',
+      'Back NIC Photo': 'assets/IDback.png',
+      'Chassi Number': 'assets/chassi.png',
+      'Meter Reader': 'assets/meter.png',
+      'Wind Screen\nLabel': 'assets/wind.png',
+    };
+
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        fixedSize: Size(buttonWidth, buttonHeight),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(width: 3, color: Colors.black),
+        ),
+        backgroundColor: _buttonColors[text] ?? Colors.white,
+        elevation: 10,
+        shadowColor: Color.fromARGB(255, 0, 0, 0),
+      ),
+      onPressed: onPressed,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (buttonImages.containsKey(text))
+            Image.asset(
+              buttonImages[text]!,
+              height: 50,
+              fit: BoxFit.cover,
+            ),
+          SizedBox(height: 3),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: fontSize,
+              color: Colors.black,
+              fontFamily: 'Georgia',
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openCamera(String buttonText) async {
+    if (buttonText == 'Accident Photos') {
+      // Allow multiple images for 'Accident Photos'
+      bool keepAdding = true;
+
+      while (keepAdding) {
+        await _captureNewImage(buttonText);
+
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Image Preview'),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Wrap(
+                          spacing: 10,
+                          children: _capturedPhotos[buttonText]!.map((file) {
+                            return Image.file(
+                              file,
+                              height: 100,
+                              width: 100,
+                              fit: BoxFit.cover,
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text('Do you want to add more photos?'),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Add More'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    keepAdding = true;
+                  },
+                ),
+                TextButton(
+                  child: Text('Done'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    keepAdding = false;
+
+                    setState(() {
+                      _buttonColors[buttonText] = Colors.green;
+                    });
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } else {
+      await _captureNewImage(buttonText);
+
+      setState(() {
+        _buttonColors[buttonText] = Colors.green;
+      });
+    }
+  }
+
+  Future<void> _captureNewImage(String buttonText) async {
+    try {
+      final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+
+      if (pickedFile != null) {
+        File imageFile = File(pickedFile.path);
+
+        setState(() {
+          _capturedPhotos[buttonText]!.add(imageFile);
+        });
+      }
+    } finally {
+      await SystemChrome.setPreferredOrientations(
+          [DeviceOrientation.portraitUp]);
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Data Collection Consent"),
-          content: const Text(
-              "We collect your personal details to process your registration. Your data is securely transmitted and not shared with third parties without your consent. Do you agree?"),
-          actions: [
+          title: Text("Error"),
+          content: Text(message),
+          actions: <Widget>[
             TextButton(
+              child: Text("OK"),
               onPressed: () {
-                Navigator.of(context).pop(false);
+                Navigator.of(context).pop();
               },
-              child: const Text("No"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text("Yes"),
             ),
           ],
         );
@@ -63,407 +355,114 @@ class _RegisterpageState extends State<Registerpage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              Navigator.of(context).pop(); // Navigate back
-            },
-          ),
-        ),
-        body: Container(
-          height: MediaQuery.of(context).size.height,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/background2.png'),
-              fit: BoxFit.cover,
+  Future<void> _sendImages() async {
+    String? riskName = GlobalData.getRiskName();
+    String? jobId = GlobalData.getOTPNumber();
+
+    if (riskName == null || jobId == null) {
+      _showErrorDialog('Risk Name or Job ID is missing.');
+      return;
+    }
+
+    _showProgressPopup(context);
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      bool allUploadsSuccessful = true;
+
+      for (var entry in _capturedPhotos.entries) {
+        final buttonName = entry.key;
+        final files = entry.value;
+
+        for (var file in files) {
+          final request = http.MultipartRequest(
+            'POST',
+            Uri.parse('http://124.43.209.68:9000/api/v1/uploadaccident'),
+          );
+
+          request.files
+              .add(await http.MultipartFile.fromPath('files', file.path));
+          request.fields['riskid'] = riskName;
+          request.fields['jobid'] = jobId;
+
+          final response = await request.send();
+
+          if (response.statusCode != 200) {
+            allUploadsSuccessful = false;
+            _showErrorDialog('Failed to send $buttonName image.');
+            break;
+          }
+        }
+        if (!allUploadsSuccessful) break;
+      }
+
+      Navigator.of(context).pop(); // Close the progress dialog
+      if (allUploadsSuccessful) {
+        _showSuccessDialog(); // Only show success dialog if all uploads succeed
+        GlobalData.setRiskName('');
+        GlobalData.setOTPNumber('');
+        _resetState();
+      }
+    } catch (e) {
+      Navigator.of(context).pop(); // Close the progress dialog
+      _showErrorDialog('An error occurred while sending images.');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Success"),
+          content: Text("All images have been successfully uploaded."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
-          ),
-          child: SingleChildScrollView(
-            child: Stack(
+          ],
+        );
+      },
+    );
+  }
+
+  void _resetState() {
+    setState(() {
+      for (var label in _allButtonLabels) {
+        _buttonColors[label] = Colors.white;
+        _capturedPhotos[label] = [];
+      }
+    });
+  }
+
+  void _showProgressPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Column(
-                        children: [
-                          Text(
-                            "Register",
-                            style: TextStyle(
-                              fontSize: 80.0,
-                              fontFamily: 'Georgia',
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 150),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SizedBox(
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                width: 500,
-                                child: DropdownButtonFormField<String>(
-                                  decoration: const InputDecoration(
-                                    labelText: 'Title',
-                                    border: OutlineInputBorder(),
-                                    labelStyle: TextStyle(color: Colors.white),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                  ),
-                                  value: _title,
-                                  onChanged: (value) =>
-                                      setState(() => _title = value),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please select a title';
-                                    }
-                                    return null;
-                                  },
-                                  items: const [
-                                    DropdownMenuItem<String>(
-                                      value: 'Mr.',
-                                      child: Text('Mr.'),
-                                    ),
-                                    DropdownMenuItem<String>(
-                                      value: 'Mrs.',
-                                      child: Text('Mrs.'),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              SizedBox(
-                                width: 500,
-                                child: TextFormField(
-                                  decoration: const InputDecoration(
-                                    labelText: 'First Name:',
-                                    border: OutlineInputBorder(),
-                                    labelStyle: TextStyle(color: Colors.white),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                  ),
-                                  keyboardType: TextInputType.name,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter First Name';
-                                    }
-                                    return null;
-                                  },
-                                  controller: firstname,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              SizedBox(
-                                width: 500,
-                                child: TextFormField(
-                                  decoration: const InputDecoration(
-                                    labelText: 'Last Name:',
-                                    border: OutlineInputBorder(),
-                                    labelStyle: TextStyle(color: Colors.white),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                  ),
-                                  keyboardType: TextInputType.name,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter Last Name';
-                                    }
-                                    return null;
-                                  },
-                                  controller: lastname,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              SizedBox(
-                                width: 500,
-                                child: TextFormField(
-                                  decoration: const InputDecoration(
-                                    labelText: 'User Name:',
-                                    border: OutlineInputBorder(),
-                                    labelStyle: TextStyle(color: Colors.white),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                  ),
-                                  keyboardType: TextInputType.name,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter User Name';
-                                    }
-                                    return null;
-                                  },
-                                  controller: username,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              SizedBox(
-                                width: 500,
-                                child: TextFormField(
-                                  decoration: const InputDecoration(
-                                    labelText: 'National ID Number:',
-                                    labelStyle: TextStyle(color: Colors.white),
-                                    border: OutlineInputBorder(),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                  ),
-                                  keyboardType: TextInputType.text,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.allow(
-                                        RegExp(r'[0-9vV]'))
-                                  ],
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter National ID Number';
-                                    }
-                                    if (!RegExp(r'^\d{12}$').hasMatch(value) &&
-                                        !RegExp(r'^\d{9}[vV]$')
-                                            .hasMatch(value)) {
-                                      return 'Enter a 12-digit number or a 9-digit number followed by V or v';
-                                    }
-                                    return null;
-                                  },
-                                  controller: nationalID,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              SizedBox(
-                                width: 500,
-                                child: TextFormField(
-                                  decoration: const InputDecoration(
-                                    labelText: 'Mobile Number:',
-                                    labelStyle: TextStyle(color: Colors.white),
-                                    border: OutlineInputBorder(),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                  ),
-                                  keyboardType: TextInputType.phone,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter Mobile Number';
-                                    }
-                                    return null;
-                                  },
-                                  controller: mobile,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              SizedBox(
-                                width: 500,
-                                child: TextFormField(
-                                  decoration: const InputDecoration(
-                                    labelText: 'E-Mail:',
-                                    labelStyle: TextStyle(color: Colors.white),
-                                    border: OutlineInputBorder(),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                  ),
-                                  keyboardType: TextInputType.emailAddress,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter E-Mail';
-                                    }
-                                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                                        .hasMatch(value)) {
-                                      return 'Please enter a valid email address';
-                                    }
-                                    return null;
-                                  },
-                                  controller: email,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              SizedBox(
-                                width: 500,
-                                child: TextFormField(
-                                  decoration: const InputDecoration(
-                                    labelText: 'Password:',
-                                    labelStyle: TextStyle(color: Colors.white),
-                                    border: OutlineInputBorder(),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                  ),
-                                  obscureText: true,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter Password';
-                                    }
-                                    return null;
-                                  },
-                                  controller: password,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              SizedBox(
-                                width: 500,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                    backgroundColor:
-                                        const Color.fromARGB(255, 51, 212, 37),
-                                    elevation: 20,
-                                    shadowColor:
-                                        const Color.fromARGB(255, 0, 0, 0),
-                                  ),
-                                  onPressed: () async {
-                                    if (_formKey.currentState!.validate()) {
-                                      // Create a map to store the input data
-                                      bool consent =
-                                          await _requestUserConsent();
-
-                                      if (!consent) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                                "You need to consent to proceed"),
-                                          ),
-                                        );
-                                        return; // Exit if user does not consent
-                                      }
-
-                                      final Map<String, dynamic> inputData = {
-                                        'title': _title,
-                                        'first_name': firstname.text,
-                                        'last_name': lastname.text,
-                                        'user_name': username.text,
-                                        'nic': nationalID.text,
-                                        'mobile_no': mobile.text,
-                                        'email': email.text,
-                                        'password': password.text,
-                                      };
-
-                                      try {
-                                        // Make a POST request to the API endpoint
-                                        final Uri apiUrl = Uri.parse(
-                                            'http://116.12.80.92:9010/api/v3/saveOldCustomer');
-                                        final response = await http.post(
-                                          apiUrl,
-                                          headers: {
-                                            'Content-Type': 'application/json',
-                                          },
-                                          body: jsonEncode(inputData),
-                                        );
-
-                                        // Check the response status code
-                                        if (response.statusCode == 201) {
-                                          // Registration successful, show a success message
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                                content: Text(
-                                                    'Registration successful!')),
-                                          );
-                                        } else {
-                                          // Registration failed, show an error message
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                                content: Text(
-                                                    'Registration failed: ${response.statusCode}')),
-                                          );
-                                        }
-                                      } catch (e) {
-                                        // Handle potential exceptions
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                              content: Text(
-                                                  'An error occurred, please try again later')),
-                                        );
-                                      }
-                                    }
-                                  },
-                                  child: const Text(
-                                    'Register Me',
-                                    style: TextStyle(
-                                        color: Color.fromARGB(255, 0, 0, 0),
-                                        fontFamily: 'Georgia',
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                CircularProgressIndicator(),
+                SizedBox(width: 20),
+                Text('Sending...'),
               ],
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
