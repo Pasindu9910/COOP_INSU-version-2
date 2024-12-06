@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously, prefer_const_literals_to_create_immutables
 
+import 'dart:async';
 import 'dart:io';
 import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ class OnsiteInspection extends StatefulWidget {
 
 class _OnsiteInspectionState extends State<OnsiteInspection> {
   String? riskName = GlobalData.getRiskName();
+
   String? oTPnumber = GlobalData.getOTPNumber();
   static const double buttonWidth = 150;
   static const double buttonHeight = 100;
@@ -32,7 +34,6 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
     'License Photo Back',
     'Meter Reader',
     'Back NIC Photo',
-    'Vehicle Book\nPhoto',
     'Chassi Number',
     'Wind Screen\nLabel',
   ];
@@ -152,10 +153,11 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
                 right: 0,
                 child: Center(
                   child: ElevatedButton(
-                    onPressed: _sendImages,
+                    onPressed: allImagesCaptured ? _sendImages : null,
                     style: ElevatedButton.styleFrom(
                       fixedSize: Size(200, 50),
-                      backgroundColor: Colors.green,
+                      backgroundColor:
+                          allImagesCaptured ? Colors.green : Colors.grey,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -364,55 +366,61 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
       return;
     }
 
+    // Show progress dialog
     _showProgressPopup(context);
 
     setState(() {
       _isLoading = true;
     });
 
+    bool isUploaded = false;
+
     try {
-      bool allUploadsSuccessful = true;
+      await _uploadAllImages(riskName, jobId).then((_) {
+        isUploaded = true;
+      });
 
-      for (var entry in _capturedPhotos.entries) {
-        final buttonName = entry.key;
-        final files = entry.value;
+      Navigator.of(context).pop();
 
-        for (var file in files) {
-          final request = http.MultipartRequest(
-            'POST',
-            Uri.parse('http://124.43.209.68:9000/api/v1/uploadaccident'),
-          );
-
-          request.files
-              .add(await http.MultipartFile.fromPath('files', file.path));
-          request.fields['riskid'] = riskName;
-          request.fields['jobid'] = jobId;
-
-          final response = await request.send();
-
-          if (response.statusCode != 200) {
-            allUploadsSuccessful = false;
-            _showErrorDialog('Failed to send $buttonName image.');
-            break;
-          }
-        }
-        if (!allUploadsSuccessful) break;
-      }
-
-      Navigator.of(context).pop(); // Close the progress dialog
-      if (allUploadsSuccessful) {
-        _showSuccessDialog(); // Only show success dialog if all uploads succeed
+      if (isUploaded) {
+        _showSuccessDialog();
         GlobalData.setRiskName('');
         GlobalData.setOTPNumber('');
         _resetState();
+      } else {
+        _showErrorDialog('Failed to send images.');
       }
     } catch (e) {
-      Navigator.of(context).pop(); // Close the progress dialog
-      _showErrorDialog('An error occurred while sending images.');
+      Navigator.of(context).pop();
+      _showErrorDialog('Images failed to send.');
     } finally {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _uploadAllImages(String riskName, String jobId) async {
+    for (var entry in _capturedPhotos.entries) {
+      final files = entry.value;
+
+      for (var file in files) {
+        final url = Uri.parse('http://124.43.209.68:9000/api/v1/uploadaccident')
+            .replace(queryParameters: {
+          'riskid': riskName,
+          'jobId': jobId,
+        });
+
+        final request = http.MultipartRequest('POST', url);
+        request.files
+            .add(await http.MultipartFile.fromPath('files', file.path));
+
+        final response = await request.send();
+
+        if (response.statusCode != 200) {
+          throw Exception('Failed to send images.');
+        }
+      }
     }
   }
 

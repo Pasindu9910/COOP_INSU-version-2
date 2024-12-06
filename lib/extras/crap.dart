@@ -32,7 +32,6 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
     'License Photo Back',
     'Meter Reader',
     'Back NIC Photo',
-    'Vehicle Book\nPhoto',
     'Chassi Number',
     'Wind Screen\nLabel',
   ];
@@ -49,8 +48,7 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
   }
 
   bool get allImagesCaptured =>
-      _capturedPhotos.values.every((files) => files.isNotEmpty) &&
-      _buttonColors.values.every((color) => color != Colors.red);
+      _capturedPhotos.values.every((files) => files.isNotEmpty);
 
   @override
   Widget build(BuildContext context) {
@@ -361,6 +359,22 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
 
     if (riskName == null || jobId == null) {
       _showErrorDialog('Risk Name or Job ID is missing.');
+      return;
+    }
+
+    // Check for empty buttons (no images)
+    List<String> emptyButtons = [];
+    _capturedPhotos.forEach((buttonName, images) {
+      if (images.isEmpty) {
+        emptyButtons.add(buttonName);
+      }
+    });
+
+    if (emptyButtons.isNotEmpty) {
+      // If there are any empty buttons, show error
+      String emptyButtonsMessage =
+          'Please capture images for the following: \n${emptyButtons.join(', ')}';
+      _showErrorDialog(emptyButtonsMessage);
       return;
     }
 
