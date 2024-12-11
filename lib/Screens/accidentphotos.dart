@@ -380,14 +380,17 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
         isUploaded = true;
       });
 
-      Navigator.of(context).pop();
-
       if (isUploaded) {
+        // Call expireOTP API
+        await _expireOTP(jobId);
+
+        Navigator.of(context).pop();
         _showSuccessDialog();
         GlobalData.setRiskName('');
         GlobalData.setOTPNumber('');
         _resetState();
       } else {
+        Navigator.of(context).pop();
         _showErrorDialog('Failed to send images.');
       }
     } catch (e) {
@@ -400,8 +403,24 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
     }
   }
 
+  Future<void> _expireOTP(String jobId) async {
+    final url = Uri.parse('http://124.43.209.68:8085/job/expireOTP/$jobId');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode != 200) {
+        throw Exception(
+            'Failed to expire OTP. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Log or handle the error if needed
+      print('Error expiring OTP: $e');
+    }
+  }
+
   Future<void> _uploadAllImages(String riskName, String jobId) async {
     for (var entry in _capturedPhotos.entries) {
+      final buttonName = entry.key;
       final files = entry.value;
 
       for (var file in files) {
@@ -409,11 +428,15 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
             .replace(queryParameters: {
           'riskid': riskName,
           'jobId': jobId,
+          'buttonName': buttonName,
         });
 
         final request = http.MultipartRequest('POST', url);
+
         request.files
             .add(await http.MultipartFile.fromPath('files', file.path));
+
+        request.fields['buttonName'] = buttonName;
 
         final response = await request.send();
 

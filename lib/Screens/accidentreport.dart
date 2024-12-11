@@ -53,8 +53,7 @@ class _AccidentReportState extends State<AccidentReport>
 
     final String enteredOtp = _otpController.text;
 
-    final Uri apiUrl = Uri.parse(
-        'http://124.43.209.68:9000/api/v1/getJobDetails/Onsite%Inspection/$enteredOtp');
+    final Uri apiUrl = Uri.parse('http://124.43.209.68:8085/job/appLogin');
 
     showDialog(
       context: context,
@@ -65,18 +64,22 @@ class _AccidentReportState extends State<AccidentReport>
     );
 
     try {
-      final response = await http.get(apiUrl, headers: {
-        'Content-Type': 'application/json',
-      });
+      final response = await http.post(
+        apiUrl,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'otp': int.tryParse(enteredOtp) ?? 0,
+        }),
+      );
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
 
-        // Assuming the API returns the OTP in a field called 'otp'
         final String apiOtp = responseData['jobNumber'] ?? '';
 
         if (enteredOtp == apiOtp) {
-          // OTP matches, proceed with navigation
           GlobalData.setOTPNumber(_otpController.text);
 
           Navigator.pop(context);
