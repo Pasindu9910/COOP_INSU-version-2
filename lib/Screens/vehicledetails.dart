@@ -77,7 +77,7 @@ class _VehicleDetailsState extends State<VehicleDetails> {
             const SnackBar(
                 content: Text('Vehicle details saved successfully!')),
           );
-          Navigator.pushNamed(context, '/Inspection');
+          Navigator.pushNamed(context, '/NewInspection');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
