@@ -389,40 +389,63 @@ class _VehicleInspecState extends State<VehicleInspec> {
       _isLoading = true;
     });
 
+    List<String> failedUploads = []; // To track failed uploads
+
     try {
       for (var entry in _capturedPhotos.entries) {
         final buttonName = entry.key;
         final file = entry.value;
+
         if (file != null) {
+          print('Sending image for button: $buttonName'); // Debug log
+
+          // Attach the riskName to the file name
+          String modifiedFileName =
+              '${buttonName.replaceAll("\n", "_")}_$riskName';
+
           final request = http.MultipartRequest(
             'POST',
-            Uri.parse('http://124.43.209.68:9000/api/v1/upload'),
+            Uri.parse('http://124.43.209.68:9000/api/v1/uploadonsiteinf'),
           );
 
-          request.files
-              .add(await http.MultipartFile.fromPath('files', file.path));
+          // Add the file with the modified name
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'files',
+              file.path,
+              filename: modifiedFileName, // Use the modified file name
+            ),
+          );
+
           request.fields['buttonName'] = buttonName;
-          request.fields['riskName'] = riskName ?? '';
+          request.fields['riskid'] = riskName ?? '';
 
           final response = await request.send();
 
           if (response.statusCode == 200) {
+            print(
+                'Successfully sent image for button: $buttonName with modified name: $modifiedFileName');
           } else {
-            _showErrorDialog('Failed to send $buttonName image.');
-          }
-
-          if (buttonName == 'Wind Screen\nLabel') {
-            if (Navigator.canPop(context)) {
-              Navigator.of(context).pop();
-            }
+            print('Failed to send image for button: $buttonName');
+            failedUploads.add(buttonName);
           }
         }
       }
 
-      _showSuccessDialog();
-      GlobalData.setRiskName('');
-      _resetState();
+      Navigator.of(context).pop(); // Close the progress dialog
+
+      if (failedUploads.isEmpty) {
+        print('All images sent successfully');
+        _showSuccessDialog();
+        GlobalData.setRiskName('');
+        _resetState();
+      } else {
+        print('Failed to send images: ${failedUploads.join(", ")}');
+        _showErrorDialog('Failed to send images: ${failedUploads.join(", ")}');
+      }
     } catch (e) {
+      Navigator.of(context).pop(); // Close the progress dialog
+      print('An error occurred: $e');
       _showErrorDialog('An error occurred while sending images.');
     } finally {
       setState(() {

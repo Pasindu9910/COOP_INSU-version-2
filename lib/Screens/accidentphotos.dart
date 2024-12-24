@@ -419,30 +419,60 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
   }
 
   Future<void> _uploadAllImages(String riskName, String jobId) async {
-    for (var entry in _capturedPhotos.entries) {
-      final buttonName = entry.key;
-      final files = entry.value;
+    List<String> failedUploads = [];
 
-      for (var file in files) {
-        final url = Uri.parse('http://124.43.209.68:9000/api/v1/uploadaccident')
-            .replace(queryParameters: {
-          'riskid': riskName,
-          'jobId': jobId,
-          'buttonName': buttonName,
-        });
+    try {
+      for (var entry in _capturedPhotos.entries) {
+        final buttonName = entry.key;
+        final files = entry.value;
 
-        final request = http.MultipartRequest('POST', url);
+        for (var file in files) {
+          // Extract the original extension
+          String originalExtension = file.path.split('.').last;
 
-        request.files
-            .add(await http.MultipartFile.fromPath('files', file.path));
+          // Create a modified file name
+          String modifiedFileName =
+              '${buttonName.replaceAll("\n", "_")}_$riskName.$originalExtension';
 
-        request.fields['buttonName'] = buttonName;
+          print('Uploading file: $modifiedFileName for button: $buttonName');
 
-        final response = await request.send();
+          final request = http.MultipartRequest(
+            'POST',
+            Uri.parse('http://124.43.209.68:9000/api/v1/uploadaccident'),
+          );
 
-        if (response.statusCode != 200) {
-          throw Exception('Failed to send images.');
+          // Add the file with the modified filename
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'files',
+              file.path,
+              filename: modifiedFileName, // Use the modified filename
+            ),
+          );
+
+          // Add additional fields to the request
+          request.fields['buttonName'] = buttonName;
+          request.fields['riskid'] = riskName;
+          request.fields['jobId'] = jobId;
+
+          final response = await request.send();
+
+          if (response.statusCode == 200) {
+            print('Successfully uploaded: $modifiedFileName');
+          } else {
+            print('Failed to upload: $modifiedFileName');
+            failedUploads.add('$buttonName - $modifiedFileName');
+          }
         }
+      }
+    } catch (e) {
+      print('An error occurred during file upload: $e');
+      failedUploads.add('Error - ${e.toString()}');
+    } finally {
+      if (failedUploads.isNotEmpty) {
+        print('Failed uploads: ${failedUploads.join(", ")}');
+      } else {
+        print('All files uploaded successfully.');
       }
     }
   }

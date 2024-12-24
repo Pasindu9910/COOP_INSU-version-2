@@ -7,32 +7,39 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
-class OnsiteInspection extends StatefulWidget {
-  const OnsiteInspection({super.key});
+class VehicleInspec extends StatefulWidget {
+  const VehicleInspec({super.key});
 
   @override
-  State<OnsiteInspection> createState() => _OnsiteInspectionState();
+  State<VehicleInspec> createState() => _VehicleInspecState();
 }
 
-class _OnsiteInspectionState extends State<OnsiteInspection> {
+class _VehicleInspecState extends State<VehicleInspec> {
   String? riskName = GlobalData.getRiskName();
-  String? oTPnumber = GlobalData.getOTPNumber();
   static const double buttonWidth = 150;
   static const double buttonHeight = 100;
   static const double fontSize = 14;
   static const double spacing = 30;
 
   final ImagePicker _picker = ImagePicker();
-  final Map<String, List<File>> _capturedPhotos = {};
+  final Map<String, File?> _capturedPhotos = {};
   final Map<String, Color> _buttonColors = {};
   final List<String> _allButtonLabels = [
-    'Accident Photos',
+    'Front Photo',
+    'Left side\nPhoto',
     'Front NIC Photo',
-    'License Photo Front',
-    'License Photo Back',
+    'License Photo',
+    'Deletion Letter',
     'Meter Reader',
+    'Left Front\nCorner',
+    'Left Back\nCorner',
+    'Back Photo',
+    'Right side\nPhoto',
     'Back NIC Photo',
+    'Vehicle Book\nPhoto',
     'Chassi Number',
+    'Right Front\nCorner',
+    'Right Back\nCorner',
     'Wind Screen\nLabel',
   ];
 
@@ -43,12 +50,13 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
     super.initState();
     for (var label in _allButtonLabels) {
       _buttonColors[label] = Colors.white;
-      _capturedPhotos[label] = []; // Initialize with empty lists
+      _capturedPhotos[label] = null;
     }
   }
 
   bool get allImagesCaptured =>
-      _capturedPhotos.values.every((files) => files.isNotEmpty);
+      _capturedPhotos.values.every((file) => file != null) &&
+      _buttonColors.values.every((color) => color != Colors.red);
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +77,7 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
               onPressed: () => Navigator.of(context).pop(),
             ),
             title: Text(
-              'Onsite Vehicle Inspection',
+              'Vehicle Inspection',
               style: TextStyle(
                 color: Colors.white,
                 fontFamily: 'Georgia',
@@ -86,7 +94,7 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
                     Padding(
                       padding: const EdgeInsets.only(top: 30.0),
                       child: Text(
-                        'Inspect Your Vehicle',
+                        'Register Your Vehicle',
                         style: TextStyle(
                           shadows: [
                             Shadow(
@@ -111,29 +119,45 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
                         children: [
                           _buildColumnWithButtons(
                             [
-                              'Accident Photos',
+                              'Front Photo',
+                              'Left side\nPhoto',
                               'Front NIC Photo',
-                              'License Photo Front',
+                              'License Photo',
+                              'Deletion Letter',
                               'Meter Reader',
+                              'Left Front\nCorner',
+                              'Left Back\nCorner',
                             ],
                             [
-                              () => _openCamera('Accident Photos'),
+                              () => _openCamera('Front Photo'),
+                              () => _openCamera('Left side\nPhoto'),
                               () => _openCamera('Front NIC Photo'),
-                              () => _openCamera('License Photo Front'),
+                              () => _openCamera('License Photo'),
+                              () => _openCamera('Deletion Letter'),
                               () => _openCamera('Meter Reader'),
+                              () => _openCamera('Left Front\nCorner'),
+                              () => _openCamera('Left Back\nCorner'),
                             ],
                           ),
                           _buildColumnWithButtons(
                             [
-                              'Chassi Number',
+                              'Back Photo',
+                              'Right side\nPhoto',
                               'Back NIC Photo',
-                              'License Photo Back',
+                              'Vehicle Book\nPhoto',
+                              'Chassi Number',
+                              'Right Front\nCorner',
+                              'Right Back\nCorner',
                               'Wind Screen\nLabel',
                             ],
                             [
-                              () => _openCamera('Chassi Number'),
+                              () => _openCamera('Back Photo'),
+                              () => _openCamera('Right side\nPhoto'),
                               () => _openCamera('Back NIC Photo'),
-                              () => _openCamera('License Photo Back'),
+                              () => _openCamera('Vehicle Book\nPhoto'),
+                              () => _openCamera('Chassi Number'),
+                              () => _openCamera('Right Front\nCorner'),
+                              () => _openCamera('Right Back\nCorner'),
                               () => _openCamera('Wind Screen\nLabel'),
                             ],
                           ),
@@ -150,10 +174,11 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
                 right: 0,
                 child: Center(
                   child: ElevatedButton(
-                    onPressed: _sendImages,
+                    onPressed: allImagesCaptured ? _sendImages : null,
                     style: ElevatedButton.styleFrom(
                       fixedSize: Size(200, 50),
-                      backgroundColor: Colors.green,
+                      backgroundColor:
+                          allImagesCaptured ? Colors.green : Colors.grey,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -199,14 +224,22 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
 
   ElevatedButton _buildElevatedButton(String text, VoidCallback onPressed) {
     final Map<String, String> buttonImages = {
-      'Accident Photos': 'assets/front1.png',
+      'Front Photo': 'assets/front1.png',
+      'Left side\nPhoto': 'assets/left.png',
       'Front NIC Photo': 'assets/ID.png',
-      'License Photo Front': 'assets/lis.png',
-      'License Photo Back': 'assets/lis.png',
+      'License Photo': 'assets/lis.png',
+      'Back Photo': 'assets/back.png',
+      'Right side\nPhoto': 'assets/right.png',
       'Back NIC Photo': 'assets/IDback.png',
+      'Vehicle Book\nPhoto': 'assets/book.png',
+      'Deletion Letter': 'assets/letter.png',
       'Chassi Number': 'assets/chassi.png',
       'Meter Reader': 'assets/meter.png',
       'Wind Screen\nLabel': 'assets/wind.png',
+      'Left Back\nCorner': 'assets/back_Left.png',
+      'Right Back\nCorner': 'assets/back_Right.png',
+      'Right Front\nCorner': 'assets/front_Right.png',
+      'Left Front\nCorner': 'assets/front_Left.png',
     };
 
     return ElevatedButton(
@@ -246,73 +279,45 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
   }
 
   Future<void> _openCamera(String buttonText) async {
-    if (buttonText == 'Accident Photos') {
-      // Allow multiple images for 'Accident Photos'
-      bool keepAdding = true;
-
-      while (keepAdding) {
-        await _captureNewImage(buttonText);
-
-        await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Image Preview'),
-              content: SizedBox(
-                width: double.maxFinite,
-                height: 400,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Wrap(
-                          spacing: 10,
-                          children: _capturedPhotos[buttonText]!.map((file) {
-                            return Image.file(
-                              file,
-                              height: 100,
-                              width: 100,
-                              fit: BoxFit.cover,
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Text('Do you want to add more photos?'),
-                  ],
+    if (_capturedPhotos[buttonText] != null) {
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Image Preview'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.file(
+                  _capturedPhotos[buttonText]!,
+                  height: 200,
+                  width: 200,
+                  fit: BoxFit.cover,
                 ),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('Add More'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    keepAdding = true;
-                  },
-                ),
-                TextButton(
-                  child: Text('Done'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    keepAdding = false;
-
-                    setState(() {
-                      _buttonColors[buttonText] = Colors.green;
-                    });
-                  },
-                ),
+                SizedBox(height: 10),
+                Text('Do you want to retake this photo?'),
               ],
-            );
-          },
-        );
-      }
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Use this photo'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Retake'),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await _captureNewImage(buttonText);
+                },
+              ),
+            ],
+          );
+        },
+      );
     } else {
       await _captureNewImage(buttonText);
-
-      setState(() {
-        _buttonColors[buttonText] = Colors.green;
-      });
     }
   }
 
@@ -322,14 +327,15 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
 
       if (pickedFile != null) {
         File imageFile = File(pickedFile.path);
-
         setState(() {
-          _capturedPhotos[buttonText]!.add(imageFile);
+          _buttonColors[buttonText] = Colors.green;
+          _capturedPhotos[buttonText] = imageFile;
         });
       }
     } finally {
-      await SystemChrome.setPreferredOrientations(
-          [DeviceOrientation.portraitUp]);
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
     }
   }
 
@@ -340,7 +346,27 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
         return AlertDialog(
           title: Text("Error"),
           content: Text(message),
-          actions: <Widget>[
+          actions: [
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Success"),
+          content: Text("Images sent successfully!"),
+          actions: [
             TextButton(
               child: Text("OK"),
               onPressed: () {
@@ -355,29 +381,8 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
 
   Future<void> _sendImages() async {
     String? riskName = GlobalData.getRiskName();
-    String? jobId = GlobalData.getOTPNumber();
 
-    if (riskName == null || jobId == null) {
-      _showErrorDialog('Risk Name or Job ID is missing.');
-      return;
-    }
-
-    // Check for empty buttons (no images)
-    List<String> emptyButtons = [];
-    _capturedPhotos.forEach((buttonName, images) {
-      if (images.isEmpty) {
-        emptyButtons.add(buttonName);
-      }
-    });
-
-    if (emptyButtons.isNotEmpty) {
-      // If there are any empty buttons, show error
-      String emptyButtonsMessage =
-          'Please capture images for the following: \n${emptyButtons.join(', ')}';
-      _showErrorDialog(emptyButtonsMessage);
-      return;
-    }
-
+    // Show progress dialog
     _showProgressPopup(context);
 
     setState(() {
@@ -385,43 +390,39 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
     });
 
     try {
-      bool allUploadsSuccessful = true;
-
       for (var entry in _capturedPhotos.entries) {
         final buttonName = entry.key;
-        final files = entry.value;
-
-        for (var file in files) {
+        final file = entry.value;
+        if (file != null) {
           final request = http.MultipartRequest(
             'POST',
-            Uri.parse('http://124.43.209.68:9000/api/v1/uploadaccident'),
+            Uri.parse('http://124.43.209.68:9000/api/v1/upload'),
           );
 
           request.files
               .add(await http.MultipartFile.fromPath('files', file.path));
-          request.fields['riskid'] = riskName;
-          request.fields['jobid'] = jobId;
+          request.fields['buttonName'] = buttonName;
+          request.fields['riskName'] = riskName ?? '';
 
           final response = await request.send();
 
-          if (response.statusCode != 200) {
-            allUploadsSuccessful = false;
+          if (response.statusCode == 200) {
+          } else {
             _showErrorDialog('Failed to send $buttonName image.');
-            break;
+          }
+
+          if (buttonName == 'Wind Screen\nLabel') {
+            if (Navigator.canPop(context)) {
+              Navigator.of(context).pop();
+            }
           }
         }
-        if (!allUploadsSuccessful) break;
       }
 
-      Navigator.of(context).pop(); // Close the progress dialog
-      if (allUploadsSuccessful) {
-        _showSuccessDialog(); // Only show success dialog if all uploads succeed
-        GlobalData.setRiskName('');
-        GlobalData.setOTPNumber('');
-        _resetState();
-      }
+      _showSuccessDialog();
+      GlobalData.setRiskName('');
+      _resetState();
     } catch (e) {
-      Navigator.of(context).pop(); // Close the progress dialog
       _showErrorDialog('An error occurred while sending images.');
     } finally {
       setState(() {
@@ -430,53 +431,35 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
     }
   }
 
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Success"),
-          content: Text("All images have been successfully uploaded."),
-          actions: <Widget>[
-            TextButton(
-              child: Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _resetState() {
     setState(() {
       for (var label in _allButtonLabels) {
         _buttonColors[label] = Colors.white;
-        _capturedPhotos[label] = [];
+        _capturedPhotos[label] = null;
       }
     });
   }
+}
 
-  void _showProgressPopup(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(width: 20),
-                Text('Sending...'),
-              ],
-            ),
+void _showProgressPopup(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text('Uploading images...'),
+            ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
 }
