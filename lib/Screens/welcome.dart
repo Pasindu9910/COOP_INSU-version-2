@@ -11,17 +11,22 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _animation;
+  late Animation<double> _glowAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 1),
+      duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
 
-    _animation = Tween<double>(begin: 1.0, end: 1.2).animate(_controller);
+    _glowAnimation = Tween<double>(begin: 10.0, end: 30.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   @override
@@ -33,7 +38,6 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-
     double fontSize = screenWidth * 0.06;
 
     return SafeArea(
@@ -45,68 +49,93 @@ class _MyHomePageState extends State<MyHomePage>
               fit: BoxFit.cover,
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 110.0),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AnimatedBuilder(
-                    animation: _animation,
-                    child: Image.asset(
-                      'assets/Logo.png',
-                      height: 180,
-                      width: 180,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment
+                  .start, // Adjusted to start for top alignment
+              children: [
+                // Move everything a little bit down by adding a SizedBox
+                SizedBox(height: 300), // Added this for space from the top
+
+                // Stack for glow and logo isolation
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Pulsating Glow
+                    AnimatedBuilder(
+                      animation: _glowAnimation,
+                      builder: (context, child) {
+                        return Container(
+                          width: 200, // Size of glow area
+                          height: 200,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue.withOpacity(0.6),
+                                blurRadius: _glowAnimation.value,
+                                spreadRadius: _glowAnimation.value / 2,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _animation.value,
-                        child: child,
-                      );
-                    },
-                  ),
-                  SizedBox(height: 30.0),
-                  Text(
-                    'For the people by the people',
-                    style: GoogleFonts.playfairDisplay(
-                      shadows: [
-                        Shadow(
-                          blurRadius: 5.0,
-                          color: const Color.fromARGB(255, 138, 137, 137),
-                          offset: Offset(2, 2),
-                        ),
-                      ],
-                      color: const Color.fromARGB(255, 0, 0, 0),
-                      fontWeight: FontWeight.bold,
-                      fontSize: fontSize,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 100.0),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        elevation: 10,
-                        shadowColor: const Color.fromARGB(255, 0, 0, 0),
-                        minimumSize: Size(100, 50)),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/decision');
-                    },
-                    child: Text(
-                      'Let\'s get started',
-                      style: TextStyle(
-                        color: const Color.fromARGB(255, 0, 0, 0),
-                        fontFamily: 'Georgia',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20.0,
+                    // Logo Image
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.asset(
+                        'assets/Logo.png',
+                        height: 180,
+                        width: 180,
                       ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 30.0),
+                Text(
+                  'For the people by the people',
+                  style: GoogleFonts.playfairDisplay(
+                    shadows: [
+                      Shadow(
+                        blurRadius: 5.0,
+                        color: const Color.fromARGB(255, 138, 137, 137),
+                        offset: Offset(2, 2),
+                      ),
+                    ],
+                    color: const Color.fromARGB(255, 0, 0, 0),
+                    fontWeight: FontWeight.bold,
+                    fontSize: fontSize,
                   ),
-                ],
-              ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(
+                    height: 50.0), // Increased space between text and button
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 10,
+                    shadowColor: const Color.fromARGB(255, 0, 0, 0),
+                    minimumSize: const Size(100, 50),
+                  ),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/decision');
+                  },
+                  child: const Text(
+                    'Let\'s get started',
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 0, 0, 0),
+                      fontFamily: 'Georgia',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20.0,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

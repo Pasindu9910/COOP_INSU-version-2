@@ -158,12 +158,12 @@ class _ChoicesPageState extends State<ChoicesPage> {
                                 imagePath: 'assets/policy.png',
                                 nicNumber: widget.nicNumber,
                               ),
-                              _buildButton(
-                                context,
-                                'ARI',
-                                imagePath: 'assets/insurance.png',
-                                null,
-                              ),
+                              // _buildButton(
+                              //   context,
+                              //   'ARI',
+                              //   imagePath: 'assets/insurance.png',
+                              //   null,
+                              // ),
                               _buildButton(
                                 context,
                                 'Third Party renewal',
