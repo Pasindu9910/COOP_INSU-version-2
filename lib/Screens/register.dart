@@ -286,9 +286,6 @@ class _RegisterpageState extends State<Registerpage> {
                                     if (value.length < 4) {
                                       return 'User name must be at least 4 characters long';
                                     }
-                                    if (!RegExp(r'^[A-Z]').hasMatch(value)) {
-                                      return 'First letter must be capital';
-                                    }
                                     return null;
                                   },
                                   controller: username,
@@ -385,7 +382,7 @@ class _RegisterpageState extends State<Registerpage> {
                                   keyboardType: TextInputType.emailAddress,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      return 'Please enter E-Mail';
+                                      return null;
                                     }
                                     if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
                                         .hasMatch(value)) {

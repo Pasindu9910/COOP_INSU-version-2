@@ -43,7 +43,7 @@ class _OwnervehicleState extends State<Ownervehicle> {
   Future<void> _fetchVehicles() async {
     try {
       final Uri apiUrl = Uri.parse(
-          'http://124.43.209.68:9000/api/v1/getuserbyid/${widget.nicNumber}');
+          'http://124.43.209.68:9000/api/v1/policies/${widget.nicNumber}');
 
       final response = await http.get(apiUrl);
 
@@ -56,7 +56,7 @@ class _OwnervehicleState extends State<Ownervehicle> {
           var item = entry.value;
           return Vehicle(
             id: '$index',
-            name: (item['riskname']?.toString().trim() ?? 'Unknown'),
+            name: (item['PRS_NAME']?.toString().trim() ?? 'Unknown'),
           );
         }).toList();
 

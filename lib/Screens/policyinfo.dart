@@ -34,7 +34,7 @@ class _PolicyinfoState extends State<Policyinfo> {
   Future<void> _fetchPolicyInfo() async {
     try {
       final Uri apiUrl = Uri.parse(
-          'http://124.43.209.68:9000/api/v1/getuserbyid/${widget.nicNumber}');
+          'http://124.43.209.68:9000/api/v1/policies/${widget.nicNumber}');
       final response = await http.get(apiUrl);
 
       if (response.statusCode == 200) {
@@ -61,15 +61,23 @@ class _PolicyinfoState extends State<Policyinfo> {
     setState(() {
       _filteredPolicyList = _policyList.where((policy) {
         String vehicleNumber =
-            policy['riskname']?.toString().toLowerCase() ?? '';
+            policy['PRS_NAME']?.toString().toLowerCase() ?? '';
         return vehicleNumber.contains(query);
       }).toList();
     });
   }
 
-  String _formatDate(String dateString) {
-    final date = DateTime.parse(dateString);
-    return DateFormat('yyyy-MM-dd - HH:mm:ss').format(date);
+  String _formatDate(String? dateString) {
+    if (dateString == null || dateString.isEmpty) {
+      return 'N/A'; // Fallback for null or empty dates
+    }
+    try {
+      final date =
+          DateTime.parse(dateString).toLocal(); // Convert to local timezone
+      return DateFormat('yyyy-MM-dd - HH:mm:ss').format(date);
+    } catch (e) {
+      return 'Invalid Date'; // Fallback for parsing errors
+    }
   }
 
   @override
@@ -163,15 +171,18 @@ class _PolicyinfoState extends State<Policyinfo> {
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildPolicyTile('Customer Name', policyData['surname']),
               _buildPolicyTile(
-                  'Customer Identity Card Number', policyData['nic']),
-              _buildPolicyTile('Vehicle Number', policyData['riskname']),
-              _buildPolicyTile('Policy Number', policyData['polno']),
+                  'Customer Name', policyData['CUS_INDV_SURNAME']?.toString()),
+              _buildPolicyTile('Customer Identity Card Number',
+                  policyData['CUS_INDV_NIC_NO']?.toString()),
               _buildPolicyTile(
-                  'Policy Period From', _formatDate(policyData['fdate'])),
+                  'Vehicle Number', policyData['PRS_NAME']?.toString()),
               _buildPolicyTile(
-                  'Policy Period To', _formatDate(policyData['tdate'])),
+                  'Policy Number', policyData['POL_POLICY_NO']?.toString()),
+              _buildPolicyTile('Policy Period From',
+                  _formatDate(policyData['POL_PERIOD_FROM']?.toString())),
+              _buildPolicyTile('Policy Period To',
+                  _formatDate(policyData['POL_PERIOD_TO']?.toString())),
             ],
           ),
         ),
