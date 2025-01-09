@@ -1,391 +1,197 @@
-// ignore_for_file: deprecated_member_use
-
-import 'dart:io';
-
-import 'package:customer_portal/global_data.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
-class ChoicesPage extends StatefulWidget {
+class Policyinfo extends StatefulWidget {
   final String nicNumber;
 
-  const ChoicesPage({super.key, required this.nicNumber});
+  const Policyinfo({super.key, required this.nicNumber});
 
   @override
-  State<ChoicesPage> createState() => _ChoicesPageState();
+  State<Policyinfo> createState() => _PolicyinfoState();
 }
 
-class _ChoicesPageState extends State<ChoicesPage> {
-  String? userName = GlobalData.getLoggedInUserName();
+class _PolicyinfoState extends State<Policyinfo> {
+  final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> _policyList = [];
+  List<Map<String, dynamic>> _filteredPolicyList = [];
+  late FlutterLocalNotificationsPlugin _notificationsPlugin;
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  File? _imageFile;
-
-  void _launchURL(String url) async {
-    launch(url);
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+    _fetchPolicyInfo().then((_) => _checkAndScheduleNotifications());
+    _searchController.addListener(_onSearchChanged);
   }
 
-  Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.gallery);
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
 
-    if (pickedFile != null) {
+  Future<void> _initializeNotifications() async {
+    tz.initializeTimeZones();
+    _notificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    await _notificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future<void> _scheduleNotification(
+      String policyNumber, String message, DateTime scheduledDate) async {
+    await _notificationsPlugin.zonedSchedule(
+      policyNumber.hashCode,
+      'Policy Expiry Reminder',
+      message,
+      tz.TZDateTime.from(scheduledDate, tz.local),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'policy_reminder_channel',
+          'Policy Reminders',
+          channelDescription: 'Notifications for policy expiry reminders',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.wallClockTime,
+    );
+  }
+
+  Future<void> _checkAndScheduleNotifications() async {
+    for (var policy in _policyList) {
+      final String? periodTo = policy['POL_PERIOD_TO']?.toString();
+      if (periodTo != null) {
+        final DateTime expiryDate = DateTime.parse(periodTo);
+        final DateTime now = DateTime.now();
+
+        // Check for reminders within a month
+        final DateTime oneMonthBefore =
+            expiryDate.subtract(const Duration(days: 30));
+        if (oneMonthBefore.isAfter(now)) {
+          await _scheduleNotification(
+            policy['POL_POLICY_NO']?.toString() ?? '',
+            'Your policy ${policy['POL_POLICY_NO']} will expire in a month.',
+            oneMonthBefore,
+          );
+        }
+
+        // Check for reminders within a week
+        final DateTime oneWeekBefore =
+            expiryDate.subtract(const Duration(days: 7));
+        if (oneWeekBefore.isAfter(now)) {
+          await _scheduleNotification(
+            policy['POL_POLICY_NO']?.toString() ?? '',
+            'Your policy ${policy['POL_POLICY_NO']} will expire in a week.',
+            oneWeekBefore,
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _fetchPolicyInfo() async {
+    try {
+      final Uri apiUrl = Uri.parse(
+          'http://124.43.209.68:9000/api/v1/policies/${widget.nicNumber}');
+      final response = await http.get(apiUrl);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonResponse = jsonDecode(response.body);
+        setState(() {
+          _policyList =
+              jsonResponse.map((item) => item as Map<String, dynamic>).toList();
+          _filteredPolicyList = _policyList;
+        });
+      } else {
+        throw Exception(
+            'Failed to load policy info, status code: ${response.statusCode}');
+      }
+    } catch (e) {
       setState(() {
-        _imageFile = File(pickedFile.path);
+        _policyList = [];
+        _filteredPolicyList = [];
       });
+    }
+  }
+
+  void _onSearchChanged() {
+    String query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredPolicyList = _policyList.where((policy) {
+        String vehicleNumber =
+            policy['PRS_NAME']?.toString().toLowerCase() ?? '';
+        return vehicleNumber.contains(query);
+      }).toList();
+    });
+  }
+
+  String _formatDate(String? dateString) {
+    if (dateString == null || dateString.isEmpty) {
+      return 'N/A';
+    }
+    try {
+      final date = DateTime.parse(dateString).toLocal();
+      return DateFormat('yyyy-MM-dd - HH:mm:ss').format(date);
+    } catch (e) {
+      return 'Invalid Date';
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: DefaultTabController(
-          length: 2,
-          child: Builder(
-            builder: (context) {
-              return Scaffold(
-                key: _scaffoldKey,
-                appBar: AppBar(
-                  backgroundColor: Color.fromARGB(255, 0, 68, 124),
-                  automaticallyImplyLeading: false,
-                  actions: [
-                    IconButton(
-                      icon: Icon(Icons.person, color: Colors.white),
-                      onPressed: () {
-                        _scaffoldKey.currentState?.openDrawer();
-                      },
-                    ),
-                  ],
-                  bottom: const TabBar(
-                    labelColor: Colors.white,
-                    indicator: UnderlineTabIndicator(
-                      borderSide: BorderSide(
-                        width: 5.0,
-                        color: Color.fromARGB(255, 244, 212, 33),
-                      ),
-                      insets: EdgeInsets.symmetric(horizontal: 1.0),
-                    ),
-                    unselectedLabelColor: Colors.white,
-                    tabs: [
-                      Tab(text: 'Services'),
-                      Tab(text: 'About Us'),
-                    ],
-                  ),
-                  title: Center(
-                    child: Transform.translate(
-                      offset: const Offset(30, 0),
-                      child: const Text(
-                        'Main Menu',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Georgia',
-                          fontSize: 30.0,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                drawer: Drawer(
-                  child: Container(
-                    color: Color.fromARGB(255, 0, 68, 124),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Spacer(),
-
-                        // Profile picture
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(left: 16.0, bottom: 8.0),
-                          child: GestureDetector(
-                            onTap: _pickImage,
-                            child: CircleAvatar(
-                              radius: 40,
-                              backgroundColor: Colors.white,
-                              child: _imageFile != null
-                                  ? ClipOval(
-                                      child: Image.file(
-                                        _imageFile!,
-                                        fit: BoxFit.cover,
-                                        width: 80.0,
-                                        height: 80.0,
-                                      ),
-                                    )
-                                  : Icon(
-                                      Icons.person,
-                                      size: 50,
-                                      color: Color.fromARGB(255, 0, 68, 124),
-                                    ),
-                            ),
-                          ),
-                        ),
-
-                        // Email text
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                userName ?? "User Name",
-                                style: TextStyle(
-                                  fontFamily: 'Georgia',
-                                  fontSize: 18,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                "user@example.com",
-                                style: TextStyle(
-                                  fontFamily: 'Georgia',
-                                  fontSize: 14,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                body: TabBarView(
-                  children: [
-                    // Services tab content
-                    Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage('assets/background2.png'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 10.0),
-                              child: _buildFullWidthButton(
-                                context,
-                                'New Policy',
-                                '/Inspection',
-                                imagePath: 'assets/protection.png',
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 10.0),
-                              child: _buildFullWidthButton(
-                                context,
-                                'Accident Report',
-                                '/Accident',
-                                imagePath: 'assets/crash.png',
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Expanded(
-                              child: GridView.count(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 20,
-                                crossAxisSpacing: 20,
-                                childAspectRatio: 1.2,
-                                children: [
-                                  _buildButton(
-                                    context,
-                                    'Policy Information',
-                                    '/Policyinfo',
-                                    imagePath: 'assets/policy.png',
-                                    nicNumber: widget.nicNumber,
-                                  ),
-                                  _buildButton(
-                                    context,
-                                    'ARI',
-                                    imagePath: 'assets/insurance.png',
-                                    null,
-                                  ),
-                                  _buildButton(
-                                    context,
-                                    'Third Party renewal',
-                                    null,
-                                    imagePath: 'assets/renewal.png',
-                                    url: 'https://online.ci.lk/third_party/',
-                                  ),
-                                  _buildButton(
-                                    context,
-                                    'Premium payment',
-                                    null,
-                                    imagePath: 'assets/pay.png',
-                                    url: 'https://online.ci.lk/general/',
-                                  ),
-                                  _buildButton(
-                                    context,
-                                    'Quotation',
-                                    null,
-                                    imagePath: 'assets/pay.png',
-                                    url: 'https://ci.lk/getamotorquote/',
-                                  ),
-                                  _buildButton(
-                                    context,
-                                    'Customer feedback',
-                                    null,
-                                    imagePath: 'assets/customer.png',
-                                    url: 'https://ci.lk/complaint/ ',
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // About Us tab content
-                    Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage('assets/background2.png'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      child: Stack(
-                        children: [
-                          SingleChildScrollView(
-                            padding: EdgeInsets.all(20),
-                            child: Column(
-                              children: [
-                                Center(
-                                  child: Text(
-                                    "About Us",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24,
-                                      fontFamily: 'Georgia',
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 20),
-                                _buildTile(
-                                  title: "Co-operative Insurance Company PLC",
-                                  content:
-                                      "Incorporated in Sri Lanka in 1999. Licensed as a company authorized to carry out insurance business under the Control of Insurance Act No. 25 of 1962 as amended by Act No. 42 of 1986 (presently replaced by Regulation of Insurance Industry Act No. 43 of 2000). We are one of the leading insurers who provide innovative insurance solutions across all lines of business, with the third-largest network in Sri Lanka.",
-                                ),
-                                _buildTile(
-                                  title: "History",
-                                  content:
-                                      "In 1999, Co-operative Insurance Company PLC (CICPLC) was established by the co-operative movement with great prospects. More than 2 decades and numerous challenges later, CICPLC is one of the largest and fastest-growing companies in Sri Lanka.\n\nAs a customer-centric and people-driven organization, we inspire our stakeholders to be proactive and innovative. Our utmost convenient solutions set us apart from other orthodox entities in the industry.",
-                                ),
-                                _buildTile(
-                                  title: "Vision",
-                                  content:
-                                      "“To be an organization that will stand 'united' with its customers to the very end.”",
-                                ),
-                                _buildTile(
-                                  title: "Mission",
-                                  content:
-                                      "“To be ever mindful of the needs of our customers and thereby make 'true protection' via the provision of innovative, yet affordable insurance solutions which conform to the highest ethical and moral standards.”",
-                                ),
-                                _buildTile(
-                                  title: "Values",
-                                  content:
-                                      "R - Respect - Respectful when REACT\nE - Ethical - Ethical when REACT\nA - Accountable - Accountable when REACT\nC - Commitment - Committed when REACT\nT - Trust - Trustworthy when REACT",
-                                ),
-                              ],
-                            ),
-                          ),
-                          Positioned(
-                            right: 16,
-                            bottom: 50,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                _buildSocialButton('assets/youtube.png',
-                                    () async {
-                                  launch(
-                                      'https://www.youtube.com/channel/UC6-Ex5c_AFfBi7mJxP6dsIw');
-                                }),
-                                SizedBox(height: 16),
-                                _buildSocialButton(
-                                  'assets/linkedin.png',
-                                  () async {
-                                    launch(
-                                        'https://www.linkedin.com/company/co-operative-insurance/');
-                                  },
-                                ),
-                                SizedBox(height: 16),
-                                _buildSocialButton(
-                                  'assets/facebook.png',
-                                  () async {
-                                    launch(
-                                        'https://www.facebook.com/Coperativeinsurance/');
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color.fromARGB(255, 0, 68, 124),
+          title: Text(
+            'Policy Information',
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Georgia',
+            ),
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(60.0),
+            child: _buildSearchBar(),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildFullWidthButton(BuildContext context, String text, String? route,
-      {String? imagePath, String? nicNumber, String? url}) {
-    return SizedBox(
-      width: double.infinity, // Full width
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(vertical: 20), // Adjust button padding
-          backgroundColor: Color.fromARGB(255, 255, 255, 255),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          elevation: 15,
-          shadowColor: Colors.black,
-        ),
-        onPressed: () {
-          if (url != null) {
-            _launchURL(url);
-          } else if (route != null) {
-            Navigator.pushNamed(
-              context,
-              route,
-              arguments: nicNumber,
-            );
-          }
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        body: Stack(
+          fit: StackFit.expand,
           children: [
-            if (imagePath != null)
-              Image.asset(
-                imagePath,
-                height: 60,
-                width: 60,
-              ),
-            SizedBox(height: 8),
-            Text(
-              text,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: const Color.fromARGB(255, 0, 0, 0),
-                fontFamily: 'Georgia',
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-              ),
+            Image.asset(
+              'assets/background2.png',
+              fit: BoxFit.cover,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _policyList.isEmpty
+                  ? Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : _filteredPolicyList.isEmpty
+                      ? Center(child: Text('No policy information found.'))
+                      : ListView.builder(
+                          itemCount: _filteredPolicyList.length,
+                          itemBuilder: (context, index) {
+                            final policyData = _filteredPolicyList[index];
+                            return _buildPolicyCard(policyData);
+                          },
+                        ),
             ),
           ],
         ),
@@ -393,104 +199,90 @@ class _ChoicesPageState extends State<ChoicesPage> {
     );
   }
 
-  Widget _buildSocialButton(String iconPath, VoidCallback onPressed) {
-    return FloatingActionButton(
-      onPressed: onPressed,
-      backgroundColor: Colors.white,
-      shape: CircleBorder(),
-      elevation: 5,
-      child: Image.asset(
-        iconPath,
-        fit: BoxFit.contain,
-        width: 30,
-        height: 30,
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8.0),
+          border: Border.all(
+            color: Colors.white,
+            width: 1.0,
+          ),
+        ),
+        child: TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            prefixIcon: Icon(Icons.search, color: Colors.grey),
+            hintText: 'Search by Vehicle Number',
+            hintStyle: TextStyle(color: Colors.grey),
+            border: InputBorder.none,
+          ),
+          style: TextStyle(color: Colors.black),
+          cursorColor: Colors.blue,
+        ),
       ),
     );
   }
 
-  Widget _buildTile({required String title, required String content}) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+  Widget _buildPolicyCard(Map<String, dynamic> policyData) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.all(4.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black, width: 1.5),
+        borderRadius: BorderRadius.circular(8.0),
       ),
-      color: Colors.white.withOpacity(0.8),
-      elevation: 8,
-      margin: EdgeInsets.symmetric(vertical: 10),
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 22,
-                fontFamily: 'Georgia',
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 0, 68, 124),
-              ),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: ListTile(
+          contentPadding: EdgeInsets.all(16.0),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildPolicyTile(
+                  'Customer Name', policyData['CUS_INDV_SURNAME']?.toString()),
+              _buildPolicyTile('Customer Identity Card Number',
+                  policyData['CUS_INDV_NIC_NO']?.toString()),
+              _buildPolicyTile(
+                  'Vehicle Number', policyData['PRS_NAME']?.toString()),
+              _buildPolicyTile(
+                  'Policy Number', policyData['POL_POLICY_NO']?.toString()),
+              _buildPolicyTile('Policy Period From',
+                  _formatDate(policyData['POL_PERIOD_FROM']?.toString())),
+              _buildPolicyTile('Policy Period To',
+                  _formatDate(policyData['POL_PERIOD_TO']?.toString())),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPolicyTile(String title, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Text(
+            '$title: ',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.blueGrey[700],
             ),
-            SizedBox(height: 10),
-            Text(
-              content,
+          ),
+          Expanded(
+            child: Text(
+              value ?? 'N/A',
               style: TextStyle(
-                fontSize: 16,
-                fontFamily: 'Georgia',
+                fontSize: 16.0,
                 color: Colors.black87,
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildButton(BuildContext context, String text, String? route,
-      {String? imagePath, String? nicNumber, String? url}) {
-    return SizedBox(
-      width: 100,
-      height: 100,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Color.fromARGB(255, 255, 255, 255),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
           ),
-          elevation: 15,
-          shadowColor: Colors.black,
-        ),
-        onPressed: () {
-          if (url != null) {
-            _launchURL(url);
-          } else if (route != null) {
-            Navigator.pushNamed(
-              context,
-              route,
-              arguments: nicNumber,
-            );
-          }
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (imagePath != null)
-              Image.asset(
-                imagePath,
-                height: 60,
-                width: 60,
-              ),
-            SizedBox(height: 8),
-            Text(
-              text,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: const Color.fromARGB(255, 0, 0, 0),
-                  fontFamily: 'Georgia',
-                  fontSize: 12.0,
-                  fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

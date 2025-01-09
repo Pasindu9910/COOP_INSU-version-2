@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class Policyinfo extends StatefulWidget {
   final String nicNumber;
@@ -16,11 +19,13 @@ class _PolicyinfoState extends State<Policyinfo> {
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _policyList = [];
   List<Map<String, dynamic>> _filteredPolicyList = [];
+  late FlutterLocalNotificationsPlugin _notificationsPlugin;
 
   @override
   void initState() {
     super.initState();
-    _fetchPolicyInfo();
+    _initializeNotifications();
+    _fetchPolicyInfo().then((_) => _checkAndScheduleNotifications());
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -29,6 +34,73 @@ class _PolicyinfoState extends State<Policyinfo> {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _initializeNotifications() async {
+    tz.initializeTimeZones();
+    _notificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    await _notificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future<void> _scheduleNotification(
+      String policyNumber, String message, DateTime scheduledDate) async {
+    await _notificationsPlugin.zonedSchedule(
+      policyNumber.hashCode,
+      'Policy Expiry Reminder',
+      message,
+      tz.TZDateTime.from(scheduledDate, tz.local),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'policy_reminder_channel',
+          'Policy Reminders',
+          channelDescription: 'Notifications for policy expiry reminders',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.wallClockTime,
+    );
+  }
+
+  Future<void> _checkAndScheduleNotifications() async {
+    for (var policy in _policyList) {
+      final String? periodTo = policy['POL_PERIOD_TO']?.toString();
+      if (periodTo != null) {
+        final DateTime expiryDate = DateTime.parse(periodTo);
+        final DateTime now = DateTime.now();
+
+        // Check for reminders within a month
+        final DateTime oneMonthBefore =
+            expiryDate.subtract(const Duration(days: 30));
+        if (oneMonthBefore.isAfter(now)) {
+          await _scheduleNotification(
+            policy['POL_POLICY_NO']?.toString() ?? '',
+            'Your policy ${policy['POL_POLICY_NO']} will expire in a month.',
+            oneMonthBefore,
+          );
+        }
+
+        // Check for reminders within a week
+        final DateTime oneWeekBefore =
+            expiryDate.subtract(const Duration(days: 7));
+        if (oneWeekBefore.isAfter(now)) {
+          await _scheduleNotification(
+            policy['POL_POLICY_NO']?.toString() ?? '',
+            'Your policy ${policy['POL_POLICY_NO']} will expire in a week.',
+            oneWeekBefore,
+          );
+        }
+      }
+    }
   }
 
   Future<void> _fetchPolicyInfo() async {
@@ -69,14 +141,13 @@ class _PolicyinfoState extends State<Policyinfo> {
 
   String _formatDate(String? dateString) {
     if (dateString == null || dateString.isEmpty) {
-      return 'N/A'; // Fallback for null or empty dates
+      return 'N/A';
     }
     try {
-      final date =
-          DateTime.parse(dateString).toLocal(); // Convert to local timezone
+      final date = DateTime.parse(dateString).toLocal();
       return DateFormat('yyyy-MM-dd - HH:mm:ss').format(date);
     } catch (e) {
-      return 'Invalid Date'; // Fallback for parsing errors
+      return 'Invalid Date';
     }
   }
 

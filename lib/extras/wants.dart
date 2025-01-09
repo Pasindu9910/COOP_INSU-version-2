@@ -327,8 +327,12 @@ class _VehicleInspecState extends State<VehicleInspec> {
 
     for (int y = 1; y < height - 1; y++) {
       for (int x = 1; x < width - 1; x++) {
-        final gx = (image.getPixel(x + 1, y) - image.getPixel(x - 1, y)) / 2;
-        final gy = (image.getPixel(x, y + 1) - image.getPixel(x, y - 1)) / 2;
+        final gx = (img.getLuminance(image.getPixel(x + 1, y)) -
+                img.getLuminance(image.getPixel(x - 1, y))) /
+            2;
+        final gy = (img.getLuminance(image.getPixel(x, y + 1)) -
+                img.getLuminance(image.getPixel(x, y - 1))) /
+            2;
         laplacianSum += (gx * gx + gy * gy);
       }
     }
@@ -350,7 +354,7 @@ class _VehicleInspecState extends State<VehicleInspec> {
 
       for (int y = 0; y < image.height; y++) {
         for (int x = 0; x < image.width; x++) {
-          int pixel = image.getPixel(x, y);
+          int pixel = image.getPixel(x, y) as int;
           totalRed += img.getRed(pixel);
           totalBlue += img.getBlue(pixel);
           totalGreen += img.getGreen(pixel);
