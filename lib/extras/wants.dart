@@ -475,7 +475,7 @@ class _VehicleInspecState extends State<VehicleInspec> {
     final zipFileData = zipEncoder.encode(archive);
     final tempDir = await Directory.systemTemp.createTemp();
     final zipFile = File('${tempDir.path}/$zipFileName');
-    await zipFile.writeAsBytes(zipFileData!);
+    await zipFile.writeAsBytes(zipFileData);
 
     final request = http.MultipartRequest(
       'POST',

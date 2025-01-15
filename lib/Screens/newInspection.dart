@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously, prefer_const_literals_to_create_immutables
 
+import 'dart:convert';
 import 'dart:io';
 import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class newvehicleInspec extends StatefulWidget {
 // ignore: camel_case_types
 class _newvehicleInspecState extends State<newvehicleInspec> {
   String? riskName = GlobalData.getRiskName();
+  String? nicNumber = GlobalData.getnICnumber();
   static const double buttonWidth = 150;
   static const double buttonHeight = 100;
   static const double fontSize = 14;
@@ -384,7 +386,6 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
   Future<void> _sendImages() async {
     String? riskName = GlobalData.getRiskName();
 
-    // Show progress dialog
     _showProgressPopup(context);
 
     setState(() {
@@ -399,8 +400,6 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
         final file = entry.value;
 
         if (file != null) {
-          print('Sending image for button: $buttonName'); // Debug log
-
           // Attach the riskName to the file name
           String modifiedFileName =
               '${buttonName.replaceAll("\n", "_")}_$riskName';
@@ -425,10 +424,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
           final response = await request.send();
 
           if (response.statusCode == 200) {
-            print(
-                'Successfully sent image for button: $buttonName with modified name: $modifiedFileName');
           } else {
-            print('Failed to send image for button: $buttonName');
             failedUploads.add(buttonName);
           }
         }
@@ -437,17 +433,15 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
       Navigator.of(context).pop(); // Close the progress dialog
 
       if (failedUploads.isEmpty) {
-        print('All images sent successfully');
         _showSuccessDialog();
         GlobalData.setRiskName('');
+        _showRatingPopup(context);
         _resetState();
       } else {
-        print('Failed to send images: ${failedUploads.join(", ")}');
         _showErrorDialog('Failed to send images: ${failedUploads.join(", ")}');
       }
     } catch (e) {
       Navigator.of(context).pop(); // Close the progress dialog
-      print('An error occurred: $e');
       _showErrorDialog('An error occurred while sending images.');
     } finally {
       setState(() {
@@ -463,6 +457,112 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
         _capturedPhotos[label] = null;
       }
     });
+  }
+}
+
+void _showRatingPopup(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      int selectedRating = 0; // Variable to store selected rating
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text("Rate Us"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "How would you rate your experience?",
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(5, (index) {
+                    return IconButton(
+                      icon: Icon(
+                        Icons.star,
+                        color: selectedRating > index
+                            ? Colors.yellow
+                            : Colors.grey,
+                        size: 40,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          selectedRating = index + 1;
+                        });
+                      },
+                    );
+                  }),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  if (selectedRating > 0) {
+                    await _sendRating(context, selectedRating); // Pass context
+                    Navigator.of(context).pop(); // Close the dialog
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Please select a rating."),
+                      ),
+                    );
+                  }
+                },
+                child: Text("Submit"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+Future<void> _sendRating(BuildContext context, int rating) async {
+  final String? nicNumber = GlobalData.getnICnumber();
+  final String apiUrl = 'http://124.43.209.68:9010/api/v7/Saveallrates';
+
+  if (nicNumber == null || nicNumber.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("NIC number is missing. Cannot submit rating.")),
+    );
+    return;
+  }
+
+  try {
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "nic": nicNumber,
+        "rate_value": rating,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Thank you for your feedback!")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to submit rating. Please try again.")),
+      );
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("An error occurred: $e")),
+    );
   }
 }
 

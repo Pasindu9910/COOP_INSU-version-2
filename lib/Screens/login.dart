@@ -265,6 +265,7 @@ class _LoginPageState extends State<LoginPage> {
             if (userData['user_name'] == username &&
                 userData['password'] == password) {
               GlobalData.setLoggedInUserName(username);
+              GlobalData.setnICnumber(idNumber);
               Navigator.pushReplacementNamed(
                 context,
                 '/Ownervehicle',
@@ -286,6 +287,7 @@ class _LoginPageState extends State<LoginPage> {
           if (userData['user_name'] == username &&
               userData['password'] == password) {
             GlobalData.setLoggedInUserName(username);
+            GlobalData.setnICnumber(idNumber);
             Navigator.pushReplacementNamed(
               context,
               '/Ownervehicle',
