@@ -47,6 +47,7 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   permission_handler: ^11.3.1
   timezone: ^0.10.0
+  video_player: ^2.8.2
   
 
 
@@ -115,6 +116,7 @@ flutter:
     - assets/customer.png
     - assets/callus.png
     - assets/background3.png
+    - assets/LOGO.mp4
     
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -392,7 +392,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
       _isLoading = true;
     });
 
-    List<String> failedUploads = []; // To track failed uploads
+    List<String> failedUploads = [];
 
     try {
       for (var entry in _capturedPhotos.entries) {
@@ -400,7 +400,6 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
         final file = entry.value;
 
         if (file != null) {
-          // Attach the riskName to the file name
           String modifiedFileName =
               '${buttonName.replaceAll("\n", "_")}_$riskName';
 
@@ -408,13 +407,11 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
             'POST',
             Uri.parse('http://124.43.209.68:9000/api/v1/uploadonsiteinf'),
           );
-
-          // Add the file with the modified name
           request.files.add(
             await http.MultipartFile.fromPath(
               'files',
               file.path,
-              filename: modifiedFileName, // Use the modified file name
+              filename: modifiedFileName,
             ),
           );
 
@@ -430,7 +427,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
         }
       }
 
-      Navigator.of(context).pop(); // Close the progress dialog
+      Navigator.of(context).pop();
 
       if (failedUploads.isEmpty) {
         _showSuccessDialog();
@@ -441,7 +438,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
         _showErrorDialog('Failed to send images: ${failedUploads.join(", ")}');
       }
     } catch (e) {
-      Navigator.of(context).pop(); // Close the progress dialog
+      Navigator.of(context).pop();
       _showErrorDialog('An error occurred while sending images.');
     } finally {
       setState(() {
@@ -464,7 +461,7 @@ void _showRatingPopup(BuildContext context) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      int selectedRating = 0; // Variable to store selected rating
+      int selectedRating = 0;
 
       return StatefulBuilder(
         builder: (context, setState) {
@@ -502,15 +499,15 @@ void _showRatingPopup(BuildContext context) {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop();
                 },
                 child: Text("Cancel"),
               ),
               ElevatedButton(
                 onPressed: () async {
                   if (selectedRating > 0) {
-                    await _sendRating(context, selectedRating); // Pass context
-                    Navigator.of(context).pop(); // Close the dialog
+                    await _sendRating(context, selectedRating);
+                    Navigator.of(context).pop();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
