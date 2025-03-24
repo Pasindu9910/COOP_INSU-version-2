@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:customer_portal/Screens/changepassword.dart';
+import 'package:customer_portal/Screens/vehicledetails.dart';
 import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -186,6 +187,23 @@ class _LoginPageState extends State<LoginPage> {
                             },
                             child: const Text(
                               'Not registered yet? Register from here!',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 226, 232, 38),
+                                fontSize: 17.0,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const VehicleDetails()),
+                              );
+                            },
+                            child: const Text(
+                              'Staff Login',
                               style: TextStyle(
                                 color: Color.fromARGB(255, 226, 232, 38),
                                 fontSize: 17.0,

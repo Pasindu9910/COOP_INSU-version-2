@@ -1,7 +1,6 @@
 import 'package:customer_portal/Screens/accidentreport.dart';
 import 'package:customer_portal/Screens/changepassword.dart';
 import 'package:customer_portal/Screens/menu.dart';
-import 'package:customer_portal/Screens/decision.dart';
 import 'package:customer_portal/Screens/login.dart';
 import 'package:customer_portal/Screens/accidentphotos.dart';
 import 'package:customer_portal/Screens/newInspection.dart';
@@ -30,8 +29,6 @@ class MyApp extends StatelessWidget {
         switch (settings.name) {
           case '/':
             return MaterialPageRoute(builder: (context) => const MyHomePage());
-          case '/decision':
-            return MaterialPageRoute(builder: (context) => const Decision());
           case '/Login':
             return MaterialPageRoute(builder: (context) => const LoginPage());
           case '/Register':

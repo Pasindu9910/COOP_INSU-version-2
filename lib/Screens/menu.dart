@@ -125,9 +125,11 @@ class _ChoicesPageState extends State<ChoicesPage> {
                             height: 150,
                             child: _buildFullWidthButton(
                               context,
-                              'New Policy',
-                              '/Inspection',
-                              imagePath: 'assets/protection.png',
+                              'Accident Report',
+                              '/Accident',
+                              imagePath: 'assets/crash.png',
+                              buttonColor:
+                                  const Color.fromARGB(255, 197, 64, 54),
                             ),
                           ),
                         ),
@@ -137,9 +139,10 @@ class _ChoicesPageState extends State<ChoicesPage> {
                             height: 150,
                             child: _buildFullWidthButton(
                               context,
-                              'Accident Report',
-                              '/Accident',
-                              imagePath: 'assets/crash.png',
+                              'Policy Information',
+                              '/Policyinfo',
+                              imagePath: 'assets/policy.png',
+                              nicNumber: widget.nicNumber,
                             ),
                           ),
                         ),
@@ -151,13 +154,13 @@ class _ChoicesPageState extends State<ChoicesPage> {
                             crossAxisSpacing: 20,
                             childAspectRatio: 1.2,
                             children: [
-                              _buildButton(
-                                context,
-                                'Policy Information',
-                                '/Policyinfo',
-                                imagePath: 'assets/policy.png',
-                                nicNumber: widget.nicNumber,
-                              ),
+                              // _buildButton(
+                              //   context,
+                              //   'Policy Information',
+                              //   '/Policyinfo',
+                              //   imagePath: 'assets/policy.png',
+                              //   nicNumber: widget.nicNumber,
+                              // ),
                               // _buildButton(
                               //   context,
                               //   'ARI',
@@ -293,14 +296,21 @@ class _ChoicesPageState extends State<ChoicesPage> {
     );
   }
 
-  Widget _buildFullWidthButton(BuildContext context, String text, String? route,
-      {String? imagePath, String? nicNumber, String? url}) {
+  Widget _buildFullWidthButton(
+    BuildContext context,
+    String text,
+    String? route, {
+    String? imagePath,
+    String? nicNumber,
+    String? url,
+    Color buttonColor = Colors.white,
+  }) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.symmetric(vertical: 20),
-          backgroundColor: Color.fromARGB(255, 255, 255, 255),
+          backgroundColor: buttonColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
