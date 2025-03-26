@@ -2,22 +2,21 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:customer_portal/Screens/changepassword.dart';
-import 'package:customer_portal/Screens/stafflogin.dart';
 import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
+import 'package:customer_portal/Screens/taskmenu.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:customer_portal/Screens/register.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class StaffLoginPage extends StatefulWidget {
+  const StaffLoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<StaffLoginPage> createState() => _StaffLoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _StaffLoginPageState extends State<StaffLoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _userNameController = TextEditingController();
@@ -67,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Text(
-                      "Login",
+                      "Staff Login",
                       style: TextStyle(
                         shadows: [
                           Shadow(
@@ -76,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
                             offset: Offset(2, 2),
                           ),
                         ],
-                        fontSize: 80.0,
+                        fontSize: 50.0,
                         fontFamily: 'Georgia',
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -165,23 +164,6 @@ class _LoginPageState extends State<LoginPage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ChangePassword()),
-                              );
-                            },
-                            child: const Text(
-                              'Forgot password? click here',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 226, 232, 38),
-                                fontSize: 17.0,
-                              ),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
                                     builder: (context) => const Registerpage()),
                               );
                             },
@@ -190,43 +172,6 @@ class _LoginPageState extends State<LoginPage> {
                               style: TextStyle(
                                 color: Color.fromARGB(255, 226, 232, 38),
                                 fontSize: 17.0,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Align(
-                            alignment: Alignment(1.7, 0.0), // Move to the right
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                  right: 16.0), // Fix to right margin
-                              child: SizedBox(
-                                width: 250, // Adjust width as needed
-                                height: 50, // Adjust height as needed
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey, // Gray color
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          0), // Rectangular shape
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const StaffLoginPage()),
-                                    );
-                                  },
-                                  child: const Text(
-                                    'Staff Login',
-                                    style: TextStyle(
-                                      color: Color.fromARGB(255, 0, 0, 0),
-                                      fontSize: 17.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
                               ),
                             ),
                           ),
@@ -279,83 +224,89 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _loginUser() async {
-    final String username = _userNameController.text;
-    final String idNumber = _idNumberController.text;
-    final String password = _passwordController.text;
-
-    final Uri apiUrl =
-        Uri.parse('http://124.43.209.68:9010/api/v3/getBynic/$idNumber');
-
-    try {
-      final response =
-          await http.get(apiUrl).timeout(const Duration(seconds: 6));
-
-      if (response.statusCode == 200) {
-        final decodedData = jsonDecode(response.body);
-
-        if (decodedData is List) {
-          final List<dynamic> userDataList = decodedData;
-
-          if (userDataList.isNotEmpty &&
-              userDataList[0] is Map<String, dynamic>) {
-            final Map<String, dynamic> userData = userDataList[0];
-
-            if (userData['user_name'] == username &&
-                userData['password'] == password) {
-              GlobalData.setLoggedInUserName(username);
-              GlobalData.setnICnumber(idNumber);
-              Navigator.pushReplacementNamed(
-                context,
-                '/Ownervehicle',
-                arguments: idNumber,
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Invalid username or password')),
-              );
-            }
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No user data found')),
-            );
-          }
-        } else if (decodedData is Map<String, dynamic>) {
-          final Map<String, dynamic> userData = decodedData;
-
-          if (userData['user_name'] == username &&
-              userData['password'] == password) {
-            GlobalData.setLoggedInUserName(username);
-            GlobalData.setnICnumber(idNumber);
-            Navigator.pushReplacementNamed(
-              context,
-              '/Ownervehicle',
-              arguments: idNumber,
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Invalid username or password')),
-            );
-          }
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content:
-                  Text('Error fetching user data: ${response.statusCode}')),
-        );
-      }
-    } on TimeoutException catch (_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('An error occurred, please try again later')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('An error occurred, please try again later')),
-      );
-    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const TaskMenu()),
+    );
   }
+  // Future<void> _loginUser() async {
+  //   final String username = _userNameController.text;
+  //   final String idNumber = _idNumberController.text;
+  //   final String password = _passwordController.text;
+
+  //   final Uri apiUrl =
+  //       Uri.parse('http://124.43.209.68:9010/api/v3/getBynic/$idNumber');
+
+  //   try {
+  //     final response =
+  //         await http.get(apiUrl).timeout(const Duration(seconds: 6));
+
+  //     if (response.statusCode == 200) {
+  //       final decodedData = jsonDecode(response.body);
+
+  //       if (decodedData is List) {
+  //         final List<dynamic> userDataList = decodedData;
+
+  //         if (userDataList.isNotEmpty &&
+  //             userDataList[0] is Map<String, dynamic>) {
+  //           final Map<String, dynamic> userData = userDataList[0];
+
+  //           if (userData['user_name'] == username &&
+  //               userData['password'] == password) {
+  //             GlobalData.setLoggedInUserName(username);
+  //             GlobalData.setnICnumber(idNumber);
+  //             Navigator.pushReplacementNamed(
+  //               context,
+  //               '/Ownervehicle',
+  //               arguments: idNumber,
+  //             );
+  //           } else {
+  //             ScaffoldMessenger.of(context).showSnackBar(
+  //               const SnackBar(content: Text('Invalid username or password')),
+  //             );
+  //           }
+  //         } else {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             const SnackBar(content: Text('No user data found')),
+  //           );
+  //         }
+  //       } else if (decodedData is Map<String, dynamic>) {
+  //         final Map<String, dynamic> userData = decodedData;
+
+  //         if (userData['user_name'] == username &&
+  //             userData['password'] == password) {
+  //           GlobalData.setLoggedInUserName(username);
+  //           GlobalData.setnICnumber(idNumber);
+  //           Navigator.pushReplacementNamed(
+  //             context,
+  //             '/Ownervehicle',
+  //             arguments: idNumber,
+  //           );
+  //         } else {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             const SnackBar(content: Text('Invalid username or password')),
+  //           );
+  //         }
+  //       }
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //             content:
+  //                 Text('Error fetching user data: ${response.statusCode}')),
+  //       );
+  //     }
+  //   } on TimeoutException catch (_) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //           content: Text('An error occurred, please try again later')),
+  //     );
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //           content: Text('An error occurred, please try again later')),
+  //     );
+  //   }
+  // }
 
   Widget _buildTextField({
     required TextEditingController controller,
