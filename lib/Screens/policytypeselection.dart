@@ -1,9 +1,8 @@
-// ignore: file_names
-import 'package:customer_portal/Screens/policytypeselection.dart';
+import 'package:customer_portal/Screens/policysearch.dart';
 import 'package:flutter/material.dart';
 
-class TaskMenu extends StatelessWidget {
-  const TaskMenu({super.key});
+class PolicyTypeSelectionPage extends StatelessWidget {
+  const PolicyTypeSelectionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,40 +35,41 @@ class TaskMenu extends StatelessWidget {
               _buildTile(
                 context,
                 icon: Icons.assignment,
-                label: 'Underwriting',
+                label: 'New Policy',
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const PolicyTypeSelectionPage()),
+                        builder: (context) => const PolicySearchPage()),
                   );
                 },
               ),
-              // const SizedBox(height: 20), // Space between tiles
-              // _buildTile(
-              //   context,
-              //   icon: Icons.people,
-              //   label: 'Staff',
-              //   onTap: () {
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(builder: (context) => const StaffPage()),
-              //     );
-              //   },
-              // ),
-              // const SizedBox(height: 20),
-              // _buildTile(
-              //   context,
-              //   icon: Icons.settings,
-              //   label: 'Settings',
-              //   onTap: () {
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(
-              //           builder: (context) => const SettingsPage()),
-              //     );
-              //   },
-              // ),
+              const SizedBox(height: 20), // Space between tiles
+              _buildTile(
+                context,
+                icon: Icons.people,
+                label: 'Renewal',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const PolicySearchPage()),
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              _buildTile(
+                context,
+                icon: Icons.settings,
+                label: 'Policy cancellation',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const PolicySearchPage()),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -117,40 +117,3 @@ class TaskMenu extends StatelessWidget {
     );
   }
 }
-
-// // Placeholder pages for navigation
-// class TaskPage extends StatelessWidget {
-//   const TaskPage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text('Tasks')),
-//       body: const Center(child: Text('Tasks Page')),
-//     );
-//   }
-// }
-
-// class StaffPage extends StatelessWidget {
-//   const StaffPage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text('Staff')),
-//       body: const Center(child: Text('Staff Page')),
-//     );
-//   }
-// }
-
-// class SettingsPage extends StatelessWidget {
-//   const SettingsPage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text('Settings')),
-//       body: const Center(child: Text('Settings Page')),
-//     );
-//   }
-// }

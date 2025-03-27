@@ -2,7 +2,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_portal/Screens/taskmenu.dart';
 import 'package:flutter/services.dart';
@@ -92,26 +91,6 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter User Name';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          _buildTextField(
-                            controller: _idNumberController,
-                            labelText: 'National ID Number:',
-                            keyboardType: TextInputType.text,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                  RegExp(r'[0-9vV]')),
-                            ],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter National ID Number';
-                              }
-                              if (!RegExp(r'^\d{12}$').hasMatch(value) &&
-                                  !RegExp(r'^\d{9}[vV]$').hasMatch(value)) {
-                                return 'Enter a 12-digit number or a 9-digit number followed by V or v';
                               }
                               return null;
                             },

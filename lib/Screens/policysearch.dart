@@ -1,3 +1,4 @@
+import 'package:customer_portal/Screens/newInspection.dart';
 import 'package:flutter/material.dart';
 import 'dart:async'; // For simulating API delay
 
@@ -118,7 +119,7 @@ class _PolicySearchPageState extends State<PolicySearchPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PolicyDetailsPage(policyData: _policyData!),
+            builder: (context) => newvehicleInspec(),
           ),
         );
       },
