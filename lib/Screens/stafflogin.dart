@@ -2,11 +2,11 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:customer_portal/Screens/staffregistration.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_portal/Screens/taskmenu.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:customer_portal/Screens/register.dart';
 
 class StaffLoginPage extends StatefulWidget {
   const StaffLoginPage({super.key});
@@ -19,7 +19,6 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _userNameController = TextEditingController();
-  final TextEditingController _idNumberController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   static const _inputBorder = OutlineInputBorder(
@@ -123,7 +122,7 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
                               onPressed: () async {
                                 if (_formKey.currentState?.validate() ??
                                     false) {
-                                  await _requestUserConsent();
+                                  await _loginUser();
                                 }
                               },
                               child: const Text(
@@ -143,7 +142,8 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const Registerpage()),
+                                    builder: (context) =>
+                                        const StaffRegisterPage()),
                               );
                             },
                             child: const Text(
@@ -165,41 +165,6 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
         ),
       ),
     );
-  }
-
-  Future<void> _requestUserConsent() async {
-    bool consent = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Data Collection Consent"),
-          content: const Text(
-              "We collect your username and National ID to log you into the system. Your data is securely transmitted and not shared with any third parties without your consent. Do you agree?"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text("No"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text("Yes"),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (!consent) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("You need to consent to data collection")),
-      );
-    } else {
-      await _loginUser();
-    }
   }
 
   Future<void> _loginUser() async {

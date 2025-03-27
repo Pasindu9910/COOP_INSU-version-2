@@ -19,7 +19,7 @@ class PolicyTypeSelectionPage extends StatelessWidget {
           backgroundColor: Colors.transparent,
           elevation: 0,
           title: const Text(
-            'Task Menu',
+            'Policy type selection',
             style: TextStyle(
               fontSize: 25,
               fontWeight: FontWeight.bold,
@@ -44,7 +44,7 @@ class PolicyTypeSelectionPage extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 20), // Space between tiles
+              const SizedBox(height: 20),
               _buildTile(
                 context,
                 icon: Icons.people,
