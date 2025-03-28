@@ -204,13 +204,13 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
   ElevatedButton _buildElevatedButton(String text, VoidCallback onPressed) {
     final Map<String, String> buttonImages = {
       'Accident Photos': 'assets/front1.png',
-      'Front NIC Photo': 'assets/ID.png',
-      'License Photo Front': 'assets/lis.png',
-      'License Photo Back': 'assets/lis.png',
-      'Back NIC Photo': 'assets/IDback.png',
-      'Chassi Number': 'assets/chassi.png',
-      'Meter Reader': 'assets/meter.png',
-      'Wind Screen\nLabel': 'assets/wind.png',
+      'Front NIC Photo': 'assets/Front NIC.png',
+      'License Photo Front': 'assets/License.png',
+      'License Photo Back': 'assets/License.png',
+      'Back NIC Photo': 'assets/Back NIC.png',
+      'Chassi Number': 'assets/chassi1.png',
+      'Meter Reader': 'assets/Meter Reader.png',
+      'Wind Screen\nLabel': 'assets/Wind Screen.png',
     };
 
     return ElevatedButton(

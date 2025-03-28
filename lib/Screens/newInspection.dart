@@ -221,6 +221,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
         buttonsWithSpacing.add(SizedBox(height: spacing));
       }
     }
+
     return Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: buttonsWithSpacing);
@@ -228,22 +229,22 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
 
   ElevatedButton _buildElevatedButton(String text, VoidCallback onPressed) {
     final Map<String, String> buttonImages = {
-      'Front Photo': 'assets/front1.png',
-      'Left side\nPhoto': 'assets/left.png',
-      'Front NIC Photo': 'assets/ID.png',
-      'License Photo': 'assets/lis.png',
-      'Back Photo': 'assets/back.png',
-      'Right side\nPhoto': 'assets/right.png',
-      'Back NIC Photo': 'assets/IDback.png',
-      'Vehicle Book\nPhoto': 'assets/book.png',
-      'Deletion Letter': 'assets/letter.png',
-      'Chassi Number': 'assets/chassi.png',
-      'Meter Reader': 'assets/meter.png',
-      'Wind Screen\nLabel': 'assets/wind.png',
-      'Left Back\nCorner': 'assets/back_Left.png',
-      'Right Back\nCorner': 'assets/back_Right.png',
-      'Right Front\nCorner': 'assets/front_Right.png',
-      'Left Front\nCorner': 'assets/front_Left.png',
+      'Front Photo': 'assets/Front Photo.png',
+      'Left side\nPhoto': 'assets/Left Side Photo.png',
+      'Front NIC Photo': 'assets/Front NIC.png',
+      'License Photo': 'assets/License.png',
+      'Back Photo': 'assets/Back Photo.png',
+      'Right side\nPhoto': 'assets/Right Side Photo.png',
+      'Back NIC Photo': 'assets/Back NIC.png',
+      'Vehicle Book\nPhoto': 'assets/Vehicle Book.png',
+      'Deletion Letter': 'assets/Deletion Letter.png',
+      'Chassi Number': 'assets/chassi1.png',
+      'Meter Reader': 'assets/Meter Reader.png',
+      'Wind Screen\nLabel': 'assets/Wind Screen.png',
+      'Left Back\nCorner': 'assets/Left Back.png',
+      'Right Back\nCorner': 'assets/Right Back.png',
+      'Right Front\nCorner': 'assets/Right Front.png',
+      'Left Front\nCorner': 'assets/Left Front.png',
     };
 
     return ElevatedButton(
@@ -264,7 +265,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
           if (buttonImages.containsKey(text))
             Image.asset(
               buttonImages[text]!,
-              height: 50,
+              height: 40,
               fit: BoxFit.cover,
             ),
           SizedBox(height: 3),

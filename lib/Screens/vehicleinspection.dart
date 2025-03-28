@@ -225,7 +225,7 @@ class _VehicleInspecState extends State<VehicleInspec> {
 
   ElevatedButton _buildElevatedButton(String text, VoidCallback onPressed) {
     final Map<String, String> buttonImages = {
-      'Front Photo': 'assets/front1.png',
+      'Front Photo': 'assets/Front Photo.png',
       'Left side\nPhoto': 'assets/left.png',
       'Front NIC Photo': 'assets/ID.png',
       'License Photo': 'assets/lis.png',

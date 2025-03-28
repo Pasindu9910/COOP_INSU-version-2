@@ -125,11 +125,11 @@ class _ChoicesPageState extends State<ChoicesPage> {
                             height: 150,
                             child: _buildFullWidthButton(
                               context,
-                              'Accident Report',
+                              'Report Your accident',
                               '/Accident',
-                              imagePath: 'assets/crash.png',
+                              imagePath: 'assets/Accident Report.png',
                               buttonColor:
-                                  const Color.fromARGB(255, 197, 64, 54),
+                                  const Color.fromARGB(255, 255, 255, 255),
                             ),
                           ),
                         ),
@@ -141,7 +141,7 @@ class _ChoicesPageState extends State<ChoicesPage> {
                               context,
                               'Policy Information',
                               '/Policyinfo',
-                              imagePath: 'assets/policy.png',
+                              imagePath: 'assets/Policy Information.png',
                               nicNumber: widget.nicNumber,
                             ),
                           ),
@@ -171,21 +171,21 @@ class _ChoicesPageState extends State<ChoicesPage> {
                                 context,
                                 'Third Party renewal',
                                 null,
-                                imagePath: 'assets/renewal.png',
+                                imagePath: 'assets/Third Party Renewal.png',
                                 url: 'https://online.ci.lk/third_party/',
                               ),
                               _buildButton(
                                 context,
                                 'Premium payment',
                                 null,
-                                imagePath: 'assets/pay.png',
+                                imagePath: 'assets/Premium Payment.png',
                                 url: 'https://online.ci.lk/general/',
                               ),
                               _buildButton(
                                 context,
                                 'Quotation',
                                 null,
-                                imagePath: 'assets/pay.png',
+                                imagePath: 'assets/Quotation.png',
                                 url: 'https://ci.lk/getamotorquote/',
                               ),
                               _buildButton(
@@ -334,8 +334,8 @@ class _ChoicesPageState extends State<ChoicesPage> {
             if (imagePath != null)
               Image.asset(
                 imagePath,
-                height: 60,
-                width: 60,
+                height: 70,
+                width: 70,
               ),
             SizedBox(height: 8),
             Text(

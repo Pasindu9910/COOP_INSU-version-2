@@ -87,32 +87,53 @@ flutter:
     - assets/Logo.png
     - assets/protection.png
     - assets/crash.png
+    - assets/Accident Report.png
     - assets/policy.png
+    - assets/Policy Information.png
     - assets/insurance.png
     - assets/front1.png
+    - assets/Front Photo.png
     - assets/left.png
+    - assets/Left Side Photo.png
     - assets/right.png
+    - assets/Right Side Photo.png
     - assets/back.png
+    - assets/Back Photo.png
     - assets/ID.png
+    - assets/Front NIC.png
     - assets/IDback.png
+    - assets/Back NIC.png
     - assets/lis.png
+    - assets/License.png
     - assets/book.png
+    - assets/Vehicle Book.png
     - assets/mycar.png
     - assets/letter.png
+    - assets/Deletion Letter.png
     - assets/chassi.png
+    - assets/chassi1.png
     - assets/meter.png
+    - assets/Meter Reader.png
     - assets/wind.png
+    - assets/Wind Screen.png
     - assets/back_Left.png
+    - assets/Left Back.png
     - assets/front_Right.png
+    - assets/Right Front.png
     - assets/front_Left.png
+    - assets/Left Front.png
     - assets/back_Right.png
+    - assets/Right Back.png
     - assets/youtube.png
     - assets/linkedin.png
     - assets/facebook.png
     - assets/change.png
+    - assets/Third Party Renewal.png
     - assets/renewal.png
     - assets/pay.png
+    - assets/Premium Payment.png
     - assets/quote.png
+    - assets/Quotation.png
     - assets/customer.png
     - assets/callus.png
     - assets/background3.png
