@@ -208,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color.fromARGB(
-                                        255, 40, 37, 218), // Button color
+                                        255, 66, 63, 224), // Button color
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(
                                           12), // Slightly smaller than container
@@ -252,7 +252,7 @@ class _LoginPageState extends State<LoginPage> {
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color.fromARGB(
-                                        255, 40, 37, 218), // Button color
+                                        255, 45, 42, 204), // Button color
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(
                                           12), // Slightly smaller than container

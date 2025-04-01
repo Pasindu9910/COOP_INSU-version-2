@@ -197,7 +197,7 @@ class _PolicySearchPageState extends State<PolicySearchPage> {
               _buildPolicyTile(
                   'Proposal Number', policyData['POL_PROPOSAL_NO']?.toString()),
               _buildPolicyTile(
-                  'Branch Number', policyData['BRANCH_NAME']?.toString()),
+                  'Branch Code', policyData['BRANCH_NAME']?.toString()),
             ],
           ),
         ),
