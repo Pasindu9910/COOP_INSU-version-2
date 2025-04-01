@@ -243,9 +243,9 @@ class _PolicyinfoState extends State<Policyinfo> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildPolicyTile(
-                  'Customer Name', policyData['CUS_INDV_SURNAME']?.toString()),
-              _buildPolicyTile('Customer Identity Card Number',
-                  policyData['CUS_INDV_NIC_NO']?.toString()),
+                  'Your Name', policyData['CUS_INDV_SURNAME']?.toString()),
+              _buildPolicyTile(
+                  'Your NIC', policyData['CUS_INDV_NIC_NO']?.toString()),
               _buildPolicyTile(
                   'Vehicle Number', policyData['PRS_NAME']?.toString()),
               _buildPolicyTile(

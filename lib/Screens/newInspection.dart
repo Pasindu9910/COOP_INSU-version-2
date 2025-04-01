@@ -80,6 +80,9 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
   bool get allImagesCaptured =>
       _buttonColors.values.every((color) => color != Colors.red);
 
+  bool get isAtLeastOnePhotoTaken =>
+      _capturedPhotos.values.any((photo) => photo != null);
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -208,11 +211,11 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                 right: 0,
                 child: Center(
                   child: ElevatedButton(
-                    onPressed: _sendImages,
+                    onPressed: isAtLeastOnePhotoTaken ? _sendImages : null,
                     style: ElevatedButton.styleFrom(
                       fixedSize: Size(200, 50),
                       backgroundColor:
-                          allImagesCaptured ? Colors.green : Colors.grey,
+                          isAtLeastOnePhotoTaken ? Colors.green : Colors.grey,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
