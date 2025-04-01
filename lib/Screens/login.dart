@@ -199,51 +199,27 @@ class _LoginPageState extends State<LoginPage> {
                             alignment: Alignment(2, 0.0),
                             child: Padding(
                               padding: const EdgeInsets.only(right: 16.0),
-                              child: SizedBox(
+                              child: Container(
                                 width: 250,
                                 height: 50,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color.fromARGB(
-                                        255, 255, 255, 255),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const StaffLoginPage()),
-                                    );
-                                  },
-                                  child: const Text(
-                                    'Staff Login',
-                                    style: TextStyle(
-                                      color: Color.fromARGB(255, 0, 0, 0),
-                                      fontSize: 17.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                padding: const EdgeInsets.all(
+                                    5), // Space between border and button
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(
+                                      255, 26, 11, 158), // Background color
+                                  borderRadius: BorderRadius.circular(
+                                      15), // Matches button shape
+                                  border: Border.all(
+                                      color: Colors.yellow,
+                                      width: 3), // Yellow border
                                 ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Align(
-                            alignment: Alignment(2, 0.0),
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 16.0),
-                              child: SizedBox(
-                                width: 250,
-                                height: 30,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color.fromARGB(
-                                        255, 255, 255, 255),
+                                    backgroundColor:
+                                        Colors.white, // Button color
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
+                                      borderRadius: BorderRadius.circular(
+                                          12), // Slightly smaller than container
                                     ),
                                   ),
                                   onPressed: () {
@@ -258,7 +234,56 @@ class _LoginPageState extends State<LoginPage> {
                                   child: const Text(
                                     'Cover Note',
                                     style: TextStyle(
-                                      color: Color.fromARGB(255, 0, 0, 0),
+                                      color: Colors.black,
+                                      fontSize: 17.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          Align(
+                            alignment: Alignment(2, 0.0),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 16.0),
+                              child: Container(
+                                width: 250,
+                                height: 50,
+                                padding: const EdgeInsets.all(
+                                    5), // Inner spacing for border effect
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(
+                                      255, 26, 11, 158), // Background color
+                                  borderRadius: BorderRadius.circular(
+                                      15), // Same as button
+                                  border: Border.all(
+                                      color: Colors.yellow,
+                                      width: 3), // Yellow border
+                                ),
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Colors.white, // Button color
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          12), // Slightly smaller than container
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const StaffLoginPage(),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text(
+                                    'Staff Login',
+                                    style: TextStyle(
+                                      color: Colors.black,
                                       fontSize: 17.0,
                                       fontWeight: FontWeight.bold,
                                     ),
