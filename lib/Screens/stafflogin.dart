@@ -25,7 +25,8 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
     borderSide: BorderSide(color: Colors.white),
   );
 
-  static const _labelStyle = TextStyle(color: Colors.white);
+  static const _labelStyle =
+      TextStyle(color: Color.fromARGB(255, 255, 255, 255));
   static const _inputDecoration = InputDecoration(
     labelStyle: _labelStyle,
     border: _inputBorder,
@@ -167,109 +168,75 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
     );
   }
 
-  Future<void> _loginUser() async {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const TaskMenu()),
-    );
-  }
-  // Future<void> _loginUser() async {
-  //   final String username = _userNameController.text;
-  //   final String idNumber = _idNumberController.text;
-  //   final String password = _passwordController.text;
-
-  //   final Uri apiUrl =
-  //       Uri.parse('http://124.43.209.68:9010/api/v3/getBynic/$idNumber');
-
-  //   try {
-  //     final response =
-  //         await http.get(apiUrl).timeout(const Duration(seconds: 6));
-
-  //     if (response.statusCode == 200) {
-  //       final decodedData = jsonDecode(response.body);
-
-  //       if (decodedData is List) {
-  //         final List<dynamic> userDataList = decodedData;
-
-  //         if (userDataList.isNotEmpty &&
-  //             userDataList[0] is Map<String, dynamic>) {
-  //           final Map<String, dynamic> userData = userDataList[0];
-
-  //           if (userData['user_name'] == username &&
-  //               userData['password'] == password) {
-  //             GlobalData.setLoggedInUserName(username);
-  //             GlobalData.setnICnumber(idNumber);
-  //             Navigator.pushReplacementNamed(
-  //               context,
-  //               '/Ownervehicle',
-  //               arguments: idNumber,
-  //             );
-  //           } else {
-  //             ScaffoldMessenger.of(context).showSnackBar(
-  //               const SnackBar(content: Text('Invalid username or password')),
-  //             );
-  //           }
-  //         } else {
-  //           ScaffoldMessenger.of(context).showSnackBar(
-  //             const SnackBar(content: Text('No user data found')),
-  //           );
-  //         }
-  //       } else if (decodedData is Map<String, dynamic>) {
-  //         final Map<String, dynamic> userData = decodedData;
-
-  //         if (userData['user_name'] == username &&
-  //             userData['password'] == password) {
-  //           GlobalData.setLoggedInUserName(username);
-  //           GlobalData.setnICnumber(idNumber);
-  //           Navigator.pushReplacementNamed(
-  //             context,
-  //             '/Ownervehicle',
-  //             arguments: idNumber,
-  //           );
-  //         } else {
-  //           ScaffoldMessenger.of(context).showSnackBar(
-  //             const SnackBar(content: Text('Invalid username or password')),
-  //           );
-  //         }
-  //       }
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //             content:
-  //                 Text('Error fetching user data: ${response.statusCode}')),
-  //       );
-  //     }
-  //   } on TimeoutException catch (_) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //           content: Text('An error occurred, please try again later')),
-  //     );
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //           content: Text('An error occurred, please try again later')),
-  //     );
-  //   }
-  // }
-
   Widget _buildTextField({
     required TextEditingController controller,
     required String labelText,
     bool obscureText = false,
-    TextInputType keyboardType = TextInputType.text,
-    List<TextInputFormatter>? inputFormatters,
-    required String? Function(String?) validator,
+    String? Function(String?)? validator,
   }) {
-    return SizedBox(
-      width: 300,
-      child: TextFormField(
-        controller: controller,
-        decoration: _inputDecoration.copyWith(labelText: labelText),
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        inputFormatters: inputFormatters,
-        validator: validator,
-      ),
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      validator: validator,
+      style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+      decoration: _inputDecoration.copyWith(labelText: labelText),
     );
   }
+
+  Future<void> _loginUser() async {
+    String username = _userNameController.text.trim();
+    String password = _passwordController.text.trim();
+
+    bool isActive = await _checkUserStatus(username);
+    if (!isActive) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Not an active user')),
+      );
+      return;
+    }
+
+    final response = await http.get(
+        Uri.parse('http://124.43.209.68:9010/api3/v1/getBySfCode/$username'));
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      if (data.isNotEmpty) {
+        var user = data[0];
+        if (user['password'] == password) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const TaskMenu()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Incorrect password')),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User not found')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error fetching user data')),
+      );
+    }
+  }
+}
+
+Future<bool> _checkUserStatus(String username) async {
+  final url =
+      Uri.parse('http://124.43.209.68:9000/api2/v1/getSfcStatus/$username');
+  try {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data.isNotEmpty && data[0]['sfc_active'] == "Y") {
+        return true;
+      }
+    }
+  } catch (e) {
+    print("Error checking user status: $e");
+  }
+  return false;
 }

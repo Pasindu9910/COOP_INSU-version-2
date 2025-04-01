@@ -138,6 +138,7 @@ flutter:
     - assets/callus.png
     - assets/background3.png
     - assets/LOGO.mp4
+    - assets/cancellation.png
     
 
   # An image asset can refer to one or more resolution-specific "variants", see

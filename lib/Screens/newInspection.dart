@@ -1,8 +1,6 @@
 // ignore_for_file: use_build_context_synchronously, prefer_const_literals_to_create_immutables
 
-import 'dart:convert';
 import 'dart:io';
-import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -416,7 +414,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
 
         if (file != null) {
           String modifiedFileName =
-              '${buttonName.replaceAll("\n", "_")}_${widget.policyNumber}_${widget.vehicleNumber}_${widget.branchNumber}.jpg';
+              '${buttonName.replaceAll("\n", "_")}_${widget.policyNumber}_${widget.policyType}_${widget.vehicleNumber}_${widget.branchNumber}.jpg';
 
           final request = http.MultipartRequest(
             'POST',
@@ -431,7 +429,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
           );
 
           request.fields['branchcode'] = widget.branchNumber;
-          request.fields['riskid'] = widget.branchNumber;
+          request.fields['riskid'] = widget.vehicleNumber;
           request.fields['jobtype'] = widget.policyType;
           request.fields['polorprono'] = widget.policyNumber;
 
@@ -448,8 +446,6 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
 
       if (failedUploads.isEmpty) {
         _showSuccessDialog();
-        GlobalData.setRiskName('');
-        _showRatingPopup(context);
         _resetState();
       } else {
         _showErrorDialog('Failed to send images: ${failedUploads.join(", ")}');
@@ -471,112 +467,6 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
         _capturedPhotos[label] = null;
       }
     });
-  }
-}
-
-void _showRatingPopup(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      int selectedRating = 0;
-
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: Text("Rate Us"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "How would you rate your experience?",
-                  style: TextStyle(fontSize: 16),
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(5, (index) {
-                    return IconButton(
-                      icon: Icon(
-                        Icons.star,
-                        color: selectedRating > index
-                            ? Colors.yellow
-                            : Colors.grey,
-                        size: 40,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          selectedRating = index + 1;
-                        });
-                      },
-                    );
-                  }),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text("Cancel"),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  if (selectedRating > 0) {
-                    await _sendRating(context, selectedRating);
-                    Navigator.of(context).pop();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Please select a rating."),
-                      ),
-                    );
-                  }
-                },
-                child: Text("Submit"),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
-
-Future<void> _sendRating(BuildContext context, int rating) async {
-  final String? nicNumber = GlobalData.getnICnumber();
-  final String apiUrl = 'http://124.43.209.68:9010/api/v7/Saveallrates';
-
-  if (nicNumber == null || nicNumber.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("NIC number is missing. Cannot submit rating.")),
-    );
-    return;
-  }
-
-  try {
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "nic": nicNumber,
-        "rate_value": rating,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Thank you for your feedback!")),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to submit rating. Please try again.")),
-      );
-    }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("An error occurred: $e")),
-    );
   }
 }
 

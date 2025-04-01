@@ -43,21 +43,21 @@ class PolicyTypeSelectionPage extends StatelessWidget {
             children: [
               _buildTile(
                 context,
-                icon: Icons.assignment,
+                imagePath: 'assets/Policy Information.png',
                 label: 'New Policy',
                 onTap: () => _onTileTap(context, 'New Policy'),
               ),
               const SizedBox(height: 20),
               _buildTile(
                 context,
-                icon: Icons.people,
+                imagePath: 'assets/Vehicle Book.png',
                 label: 'Renewal',
                 onTap: () => _onTileTap(context, 'Renewal'),
               ),
               const SizedBox(height: 20),
               _buildTile(
                 context,
-                icon: Icons.settings,
+                imagePath: 'assets/cancellation.png',
                 label: 'Policy Cancellation',
                 onTap: () => _onTileTap(context, 'Policy Cancellation'),
               ),
@@ -69,9 +69,9 @@ class PolicyTypeSelectionPage extends StatelessWidget {
   }
 
   Widget _buildTile(BuildContext context,
-      {required IconData icon,
-      required String label,
-      required VoidCallback onTap}) {
+      {required String label,
+      required VoidCallback onTap,
+      required String imagePath}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -92,7 +92,11 @@ class PolicyTypeSelectionPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 50, color: Colors.black),
+            Image.asset(
+              imagePath,
+              width: 50,
+              height: 50,
+            ),
             const SizedBox(height: 10),
             Text(
               label,

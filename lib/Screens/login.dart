@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:customer_portal/Screens/register.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -195,19 +196,18 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 20),
                           Align(
-                            alignment: Alignment(1.7, 0.0), // Move to the right
+                            alignment: Alignment(2, 0.0),
                             child: Padding(
-                              padding: const EdgeInsets.only(
-                                  right: 16.0), // Fix to right margin
+                              padding: const EdgeInsets.only(right: 16.0),
                               child: SizedBox(
-                                width: 250, // Adjust width as needed
-                                height: 50, // Adjust height as needed
+                                width: 250,
+                                height: 50,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey, // Gray color
+                                    backgroundColor: const Color.fromARGB(
+                                        255, 255, 255, 255),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          0), // Rectangular shape
+                                      borderRadius: BorderRadius.circular(15),
                                     ),
                                   ),
                                   onPressed: () {
@@ -220,6 +220,43 @@ class _LoginPageState extends State<LoginPage> {
                                   },
                                   child: const Text(
                                     'Staff Login',
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 0, 0, 0),
+                                      fontSize: 17.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Align(
+                            alignment: Alignment(2, 0.0),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 16.0),
+                              child: SizedBox(
+                                width: 250,
+                                height: 30,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color.fromARGB(
+                                        255, 255, 255, 255),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    const url =
+                                        'http://portal.ci.lk/dist/covernote/';
+                                    if (Uri.parse(url).isAbsolute) {
+                                      launchUrl(Uri.parse(url));
+                                    } else {
+                                      throw 'Could not launch $url';
+                                    }
+                                  },
+                                  child: const Text(
+                                    'Cover Note',
                                     style: TextStyle(
                                       color: Color.fromARGB(255, 0, 0, 0),
                                       fontSize: 17.0,

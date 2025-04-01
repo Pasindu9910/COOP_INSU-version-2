@@ -1,4 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class StaffRegisterPage extends StatefulWidget {
   const StaffRegisterPage({super.key});
@@ -21,15 +25,55 @@ class _StaffRegisterPageState extends State<StaffRegisterPage> {
     super.dispose();
   }
 
-  void _registerStaff() {
-    if (_formKey.currentState!.validate()) {
+  Future<bool> _checkUserStatus(String username) async {
+    final url =
+        Uri.parse('http://124.43.209.68:9000/api2/v1/getSfcStatus/$username');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data.isNotEmpty && data[0]['sfc_active'] == "Y") {
+          return true;
+        }
+      }
+    } catch (e) {
+      print("Error checking user status: $e");
+    }
+    return false;
+  }
+
+  Future<void> _registerUser() async {
+    final username = usernameController.text;
+    final password = passwordController.text;
+
+    if (await _checkUserStatus(username)) {
+      final url = Uri.parse('http://124.43.209.68:9010/api3/v1/saveuser');
+      final body = json.encode({"sfc_code": username, "password": password});
+      try {
+        final response = await http.post(
+          url,
+          headers: {"Content-Type": "application/json"},
+          body: body,
+        );
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Staff registered successfully!')),
+          );
+          Future.delayed(const Duration(seconds: 2), () {
+            Navigator.pop(context);
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registration failed.')),
+          );
+        }
+      } catch (e) {
+        print("Error registering user: $e");
+      }
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Staff registered successfully!')),
+        const SnackBar(content: Text('Not an active user.')),
       );
-      // Implement actual registration logic here\
-      Future.delayed(const Duration(seconds: 2), () {
-        Navigator.pop(context); // Navigate back to the login page
-      });
     }
   }
 
@@ -111,7 +155,6 @@ class _StaffRegisterPageState extends State<StaffRegisterPage> {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a password';
                         }
-
                         return null;
                       },
                     ),
@@ -150,7 +193,11 @@ class _StaffRegisterPageState extends State<StaffRegisterPage> {
                         elevation: 20,
                         shadowColor: Colors.black,
                       ),
-                      onPressed: _registerStaff,
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          _registerUser();
+                        }
+                      },
                       child: const Text(
                         'Register',
                         style: TextStyle(

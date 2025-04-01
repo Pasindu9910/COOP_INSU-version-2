@@ -35,7 +35,7 @@ class TaskMenu extends StatelessWidget {
             children: [
               _buildTile(
                 context,
-                icon: Icons.assignment,
+                imagePath: 'assets/License.png',
                 label: 'Underwriting',
                 onTap: () {
                   Navigator.push(
@@ -78,9 +78,9 @@ class TaskMenu extends StatelessWidget {
   }
 
   Widget _buildTile(BuildContext context,
-      {required IconData icon,
-      required String label,
-      required VoidCallback onTap}) {
+      {required String label,
+      required VoidCallback onTap,
+      required String imagePath}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -101,7 +101,11 @@ class TaskMenu extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 50, color: Colors.black),
+            Image.asset(
+              imagePath,
+              width: 50,
+              height: 50,
+            ),
             const SizedBox(height: 10),
             Text(
               label,
