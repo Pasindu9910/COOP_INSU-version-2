@@ -55,7 +55,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
     'Proposal From Back',
     'Valuation Report Front',
     'Valuation Report Back',
-    'Inspection Report',
+    'Inspection Report Front',
   ];
 
   bool _isLoading = false;
@@ -77,11 +77,8 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
   //   print('Received Policy Type: ${widget.policyType}');
   // }
 
-  bool get anyImageCaptured =>
-      _capturedPhotos.values.any((file) => file != null);
-
   bool get allImagesCaptured =>
-      _capturedPhotos.values.every((file) => file != null);
+      _buttonColors.values.every((color) => color != Colors.red);
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +151,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                               'Deletion Letter',
                               'Proposal Form Front',
                               'Valuation Report Front',
+                              'Inspection Report Front',
                             ],
                             [
                               () => _openCamera('Front Photo'),
@@ -166,6 +164,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                               () => _openCamera('Deletion Letter'),
                               () => _openCamera('Proposal Form Front'),
                               () => _openCamera('Valuation Report Front'),
+                              () => _openCamera('Inspection Report Front'),
                             ],
                           ),
                           _buildColumnWithButtons(
@@ -180,6 +179,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                               'Vehicle Book\nPhoto',
                               'Proposal Form Back',
                               'Valuation Report Back',
+                              'Inspection Report Back'
                             ],
                             [
                               () => _openCamera('Back Photo'),
@@ -192,23 +192,13 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                               () => _openCamera('Vehicle Book\nPhoto'),
                               () => _openCamera('Proposal Form Back'),
                               () => _openCamera('Valuation Report Back'),
+                              () => _openCamera('Inspection Report Back'),
                             ],
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 40),
-                    Positioned(
-                      bottom: 80,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: _buildElevatedButton(
-                          'Inspection Report',
-                          () => _openCamera('Inspection Report'),
-                        ),
-                      ),
-                    ),
+                    SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -218,13 +208,11 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                 right: 0,
                 child: Center(
                   child: ElevatedButton(
-                    onPressed:
-                        _capturedPhotos.values.any((file) => file != null)
-                            ? _sendImages
-                            : null,
+                    onPressed: _sendImages,
                     style: ElevatedButton.styleFrom(
                       fixedSize: Size(200, 50),
-                      backgroundColor: Colors.green,
+                      backgroundColor:
+                          allImagesCaptured ? Colors.green : Colors.grey,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -291,7 +279,8 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
       'Proposal Form Back': 'assets/Formfront.png',
       'Valuation Report Front': 'assets/Valuationreport.png',
       'Valuation Report Back': 'assets/Valuationreport.png',
-      'Inspection Report': 'assets/Inspectionreport.png',
+      'Inspection Report Front': 'assets/Inspectionreport.png',
+      'Inspection Report Back': 'assets/Inspectionreport.png',
     };
 
     return ElevatedButton(
@@ -447,7 +436,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
 
         if (file != null) {
           String modifiedFileName =
-              '${buttonName.replaceAll("\n", "_")}_${widget.policyNumber}_${widget.policyType}_${widget.vehicleNumber}_${widget.branchNumber}.jpg';
+              '${buttonName.replaceAll("\n", "_")}_${widget.policyNumber}.jpg';
 
           final request = http.MultipartRequest(
             'POST',

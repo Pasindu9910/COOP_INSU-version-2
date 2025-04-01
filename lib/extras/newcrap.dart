@@ -1,184 +1,250 @@
-import 'dart:convert';
+// ignore_for_file: use_build_context_synchronously, prefer_const_literals_to_create_immutables
+
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 
-class PolicySearchPage extends StatefulWidget {
-  const PolicySearchPage({super.key});
+// ignore: camel_case_types
+class newvehicleInspec extends StatefulWidget {
+  final String policyNumber;
+  final String branchNumber;
+  final String vehicleNumber;
+  final String policyType;
 
+  const newvehicleInspec({
+    super.key,
+    required this.policyNumber,
+    required this.branchNumber,
+    required this.vehicleNumber,
+    required this.policyType,
+  });
   @override
-  State<PolicySearchPage> createState() => _PolicySearchPageState();
+  State<newvehicleInspec> createState() => _newvehicleInspecState();
 }
 
-class _PolicySearchPageState extends State<PolicySearchPage> {
-  List<Map<String, dynamic>> _policyList = [];
-  List<Map<String, dynamic>> _filteredPolicyList = [];
-  final TextEditingController _searchController = TextEditingController();
+// ignore: camel_case_types
+class _newvehicleInspecState extends State<newvehicleInspec> {
+  static const double buttonWidth = 150;
+  static const double buttonHeight = 100;
+  static const double fontSize = 14;
+  static const double spacing = 30;
+
+  final ImagePicker _picker = ImagePicker();
+  final Map<String, File?> _capturedPhotos = {};
+  final Map<String, Color> _buttonColors = {};
+  final List<String> _allButtonLabels = [
+    'Front Photo',
+    'Left side\nPhoto',
+    'Front NIC Photo',
+    'License Photo',
+    'Deletion Letter',
+    'Meter Reader',
+    'Left Front\nCorner',
+    'Left Back\nCorner',
+    'Back Photo',
+    'Right side\nPhoto',
+    'Back NIC Photo',
+    'Vehicle Book\nPhoto',
+    'Chassi Number',
+    'Right Front\nCorner',
+    'Right Back\nCorner',
+    'Wind Screen\nLabel',
+    'Proposal Form Front',
+    'Proposal From Back',
+    'Valuation Report Front',
+    'Valuation Report Back',
+    'Inspection Report',
+  ];
+
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_onSearchChanged);
-  }
-
-  @override
-  void dispose() {
-    _searchController.removeListener(_onSearchChanged);
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _fetchPolicyInfo(String nicNumber) async {
-    if (nicNumber.length < 5) return; // Avoid unnecessary API calls
-
-    try {
-      final Uri apiUrl =
-          Uri.parse('http://124.43.209.68:9000/api/v1/policies/$nicNumber');
-      final response = await http.get(apiUrl);
-
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonResponse = jsonDecode(response.body);
-        setState(() {
-          _policyList =
-              jsonResponse.map((item) => item as Map<String, dynamic>).toList();
-          _filteredPolicyList = _policyList;
-        });
-      } else {
-        setState(() {
-          _policyList = [];
-          _filteredPolicyList = [];
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _policyList = [];
-        _filteredPolicyList = [];
-      });
+    // _printReceivedValues();
+    for (var label in _allButtonLabels) {
+      _buttonColors[label] = Colors.white;
+      _capturedPhotos[label] = null;
     }
   }
 
-  void _onSearchChanged() {
-    String query = _searchController.text.trim();
-    if (query.length >= 5) {
-      _fetchPolicyInfo(query);
-    }
-  }
+  // void _printReceivedValues() {
+  //   print('Received Policy Number: ${widget.policyNumber}');
+  //   print('Received Branch Number: ${widget.branchNumber}');
+  //   print('Received Vehicle Number: ${widget.vehicleNumber}');
+  //   print('Received Policy Type: ${widget.policyType}');
+  // }
 
-  String _formatDate(String? dateString) {
-    if (dateString == null || dateString.isEmpty) {
-      return 'N/A';
-    }
-    try {
-      final date = DateTime.parse(dateString).toLocal();
-      return DateFormat('yyyy-MM-dd - HH:mm:ss').format(date);
-    } catch (e) {
-      return 'Invalid Date';
-    }
-  }
+  bool get anyImageCaptured =>
+      _capturedPhotos.values.any((file) => file != null);
+
+  bool get allImagesCaptured =>
+      _capturedPhotos.values.every((file) => file != null);
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Color.fromARGB(255, 0, 68, 124),
-          title: Text(
-            'Policy Search',
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'Georgia',
-            ),
-          ),
-          iconTheme: IconThemeData(color: Colors.white),
-          bottom: PreferredSize(
-            preferredSize: Size.fromHeight(60.0),
-            child: _buildSearchBar(),
-          ),
-        ),
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.asset(
-              'assets/background2.png',
-              fit: BoxFit.cover,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: _policyList.isEmpty
-                  ? Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : _filteredPolicyList.isEmpty
-                      ? Center(child: Text('No policy information found.'))
-                      : ListView.builder(
-                          itemCount: _filteredPolicyList.length,
-                          itemBuilder: (context, index) {
-                            final policyData = _filteredPolicyList[index];
-                            return _buildPolicyCard(policyData);
-                          },
-                        ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Container(
-        height: 40,
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(
-            color: Colors.white,
-            width: 1.0,
+          image: DecorationImage(
+            image: AssetImage('assets/background2.png'),
+            fit: BoxFit.cover,
           ),
         ),
-        child: TextField(
-          controller: _searchController,
-          decoration: InputDecoration(
-            prefixIcon: Icon(Icons.search, color: Colors.grey),
-            hintText: 'Enter NIC Number',
-            hintStyle: TextStyle(color: Colors.grey),
-            border: InputBorder.none,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: Text(
+              'Vehicle Inspection',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'Georgia',
+              ),
+            ),
+            backgroundColor: Color.fromARGB(255, 0, 68, 124),
           ),
-          style: TextStyle(color: Colors.black),
-          cursorColor: Colors.blue,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPolicyCard(Map<String, dynamic> policyData) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.all(4.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 1.5),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Card(
-        margin: EdgeInsets.zero,
-        child: ListTile(
-          contentPadding: EdgeInsets.all(16.0),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          body: Stack(
             children: [
-              _buildPolicyTile(
-                  'Customer Name', policyData['CUS_INDV_SURNAME']?.toString()),
-              _buildPolicyTile('Customer Identity Card Number',
-                  policyData['CUS_INDV_NIC_NO']?.toString()),
-              _buildPolicyTile(
-                  'Vehicle Number', policyData['PRS_NAME']?.toString()),
-              _buildPolicyTile(
-                  'Policy Number', policyData['POL_POLICY_NO']?.toString()),
-              _buildPolicyTile('Policy Period From',
-                  _formatDate(policyData['POL_PERIOD_FROM']?.toString())),
-              _buildPolicyTile('Policy Period To',
-                  _formatDate(policyData['POL_PERIOD_TO']?.toString())),
+              SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 80.0),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30.0),
+                      child: Text(
+                        'Register Your Vehicle',
+                        style: TextStyle(
+                          shadows: [
+                            Shadow(
+                              blurRadius: 5.0,
+                              color: Colors.black,
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontFamily: 'Georgia',
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildColumnWithButtons(
+                            [
+                              'Front Photo',
+                              'Left side\nPhoto',
+                              'Left Front\nCorner',
+                              'Left Back\nCorner',
+                              'Meter Reader',
+                              'Front NIC Photo',
+                              'License Photo',
+                              'Deletion Letter',
+                              'Proposal Form Front',
+                              'Valuation Report Front',
+                            ],
+                            [
+                              () => _openCamera('Front Photo'),
+                              () => _openCamera('Left side\nPhoto'),
+                              () => _openCamera('Left Front\nCorner'),
+                              () => _openCamera('Left Back\nCorner'),
+                              () => _openCamera('Meter Reader'),
+                              () => _openCamera('Front NIC Photo'),
+                              () => _openCamera('License Photo'),
+                              () => _openCamera('Deletion Letter'),
+                              () => _openCamera('Proposal Form Front'),
+                              () => _openCamera('Valuation Report Front'),
+                            ],
+                          ),
+                          _buildColumnWithButtons(
+                            [
+                              'Back Photo',
+                              'Right side\nPhoto',
+                              'Right Front\nCorner',
+                              'Right Back\nCorner',
+                              'Chassi Number',
+                              'Wind Screen\nLabel',
+                              'Back NIC Photo',
+                              'Vehicle Book\nPhoto',
+                              'Proposal Form Back',
+                              'Valuation Report Back',
+                            ],
+                            [
+                              () => _openCamera('Back Photo'),
+                              () => _openCamera('Right side\nPhoto'),
+                              () => _openCamera('Right Front\nCorner'),
+                              () => _openCamera('Right Back\nCorner'),
+                              () => _openCamera('Chassi Number'),
+                              () => _openCamera('Wind Screen\nLabel'),
+                              () => _openCamera('Back NIC Photo'),
+                              () => _openCamera('Vehicle Book\nPhoto'),
+                              () => _openCamera('Proposal Form Back'),
+                              () => _openCamera('Valuation Report Back'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Positioned(
+                      bottom: 80,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: _buildElevatedButton(
+                          'Inspection Report',
+                          () => _openCamera('Inspection Report'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                bottom: 20,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed:
+                        _capturedPhotos.values.any((file) => file != null)
+                            ? _sendImages
+                            : null,
+                    style: ElevatedButton.styleFrom(
+                      fixedSize: Size(200, 50),
+                      backgroundColor: Colors.green,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      'Send',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontFamily: 'Georgia',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (_isLoading)
+                Center(
+                  child: CircularProgressIndicator(),
+                ),
             ],
           ),
         ),
@@ -186,29 +252,276 @@ class _PolicySearchPageState extends State<PolicySearchPage> {
     );
   }
 
-  Widget _buildPolicyTile(String title, String? value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
+  Column _buildColumnWithButtons(
+      List<String> buttonTexts, List<VoidCallback> onPressedFunctions) {
+    List<Widget> buttonsWithSpacing = [];
+    for (int i = 0; i < buttonTexts.length; i++) {
+      buttonsWithSpacing.add(
+        _buildElevatedButton(buttonTexts[i], onPressedFunctions[i]),
+      );
+      if (i < buttonTexts.length - 1) {
+        buttonsWithSpacing.add(SizedBox(height: spacing));
+      }
+    }
+
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: buttonsWithSpacing);
+  }
+
+  ElevatedButton _buildElevatedButton(String text, VoidCallback onPressed) {
+    final Map<String, String> buttonImages = {
+      'Front Photo': 'assets/Front Photo.png',
+      'Left side\nPhoto': 'assets/Left Side Photo.png',
+      'Front NIC Photo': 'assets/Front NIC.png',
+      'License Photo': 'assets/License.png',
+      'Back Photo': 'assets/Back Photo.png',
+      'Right side\nPhoto': 'assets/Right Side Photo.png',
+      'Back NIC Photo': 'assets/Back NIC.png',
+      'Vehicle Book\nPhoto': 'assets/Vehicle Book.png',
+      'Deletion Letter': 'assets/Deletion Letter.png',
+      'Chassi Number': 'assets/chassi1.png',
+      'Meter Reader': 'assets/Meter Reader.png',
+      'Wind Screen\nLabel': 'assets/Wind Screen.png',
+      'Left Back\nCorner': 'assets/Left Back.png',
+      'Right Back\nCorner': 'assets/Right Back.png',
+      'Right Front\nCorner': 'assets/Right Front.png',
+      'Left Front\nCorner': 'assets/Left Front.png',
+      'Proposal Form Front': 'assets/Formback.png',
+      'Proposal Form Back': 'assets/Formfront.png',
+      'Valuation Report Front': 'assets/Valuationreport.png',
+      'Valuation Report Back': 'assets/Valuationreport.png',
+      'Inspection Report': 'assets/Inspectionreport.png',
+    };
+
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        fixedSize: Size(buttonWidth, buttonHeight),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(width: 3, color: Colors.black),
+        ),
+        backgroundColor: _buttonColors[text] ?? Colors.white,
+        elevation: 10,
+        shadowColor: Color.fromARGB(255, 0, 0, 0),
+      ),
+      onPressed: onPressed,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          if (buttonImages.containsKey(text))
+            Image.asset(
+              buttonImages[text]!,
+              height: 40,
+              fit: BoxFit.cover,
+            ),
+          SizedBox(height: 3),
           Text(
-            '$title: ',
+            text,
             style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.blueGrey[700],
+              fontSize: fontSize,
+              color: Colors.black,
+              fontFamily: 'Georgia',
             ),
-          ),
-          Expanded(
-            child: Text(
-              value ?? 'N/A',
-              style: TextStyle(
-                fontSize: 16.0,
-                color: Colors.black87,
-              ),
-            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
+
+  Future<void> _openCamera(String buttonText) async {
+    if (_capturedPhotos[buttonText] != null) {
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Image Preview'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.file(
+                  _capturedPhotos[buttonText]!,
+                  height: 200,
+                  width: 200,
+                  fit: BoxFit.cover,
+                ),
+                SizedBox(height: 10),
+                Text('Do you want to retake this photo?'),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Use this photo'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Retake'),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await _captureNewImage(buttonText);
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      await _captureNewImage(buttonText);
+    }
+  }
+
+  Future<void> _captureNewImage(String buttonText) async {
+    try {
+      final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+
+      if (pickedFile != null) {
+        File imageFile = File(pickedFile.path);
+        setState(() {
+          _buttonColors[buttonText] = Colors.green;
+          _capturedPhotos[buttonText] = imageFile;
+        });
+      }
+    } finally {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Error"),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Success"),
+          content: Text("Images sent successfully!"),
+          actions: [
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _sendImages() async {
+    _showProgressPopup(context);
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    List<String> failedUploads = [];
+
+    try {
+      for (var entry in _capturedPhotos.entries) {
+        final buttonName = entry.key;
+        final file = entry.value;
+
+        if (file != null) {
+          String modifiedFileName =
+              '${buttonName.replaceAll("\n", "_")}_${widget.policyNumber}_${widget.policyType}_${widget.vehicleNumber}_${widget.branchNumber}.jpg';
+
+          final request = http.MultipartRequest(
+            'POST',
+            Uri.parse('http://124.43.209.68:9000/api/v1/uploadunderwritting'),
+          );
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'files',
+              file.path,
+              filename: modifiedFileName,
+            ),
+          );
+
+          request.fields['branchcode'] = widget.branchNumber;
+          request.fields['riskid'] = widget.vehicleNumber;
+          request.fields['jobtype'] = widget.policyType;
+          request.fields['polorprono'] = widget.policyNumber;
+
+          final response = await request.send();
+
+          if (response.statusCode == 200) {
+          } else {
+            failedUploads.add(buttonName);
+          }
+        }
+      }
+
+      Navigator.of(context).pop();
+
+      if (failedUploads.isEmpty) {
+        _showSuccessDialog();
+        _resetState();
+      } else {
+        _showErrorDialog('Failed to send images: ${failedUploads.join(", ")}');
+      }
+    } catch (e) {
+      Navigator.of(context).pop();
+      _showErrorDialog('An error occurred while sending images.');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _resetState() {
+    setState(() {
+      for (var label in _allButtonLabels) {
+        _buttonColors[label] = Colors.white;
+        _capturedPhotos[label] = null;
+      }
+    });
+  }
+}
+
+void _showProgressPopup(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text('Uploading images...'),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
