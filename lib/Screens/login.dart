@@ -200,23 +200,15 @@ class _LoginPageState extends State<LoginPage> {
                             child: Padding(
                               padding: const EdgeInsets.only(right: 16.0),
                               child: Container(
-                                width: 250,
+                                width: 200,
                                 height: 50,
                                 padding: const EdgeInsets.all(
                                     5), // Space between border and button
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(
-                                      255, 26, 11, 158), // Background color
-                                  borderRadius: BorderRadius.circular(
-                                      15), // Matches button shape
-                                  border: Border.all(
-                                      color: Colors.yellow,
-                                      width: 3), // Yellow border
-                                ),
+
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        Colors.white, // Button color
+                                    backgroundColor: const Color.fromARGB(
+                                        255, 40, 37, 218), // Button color
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(
                                           12), // Slightly smaller than container
@@ -231,12 +223,15 @@ class _LoginPageState extends State<LoginPage> {
                                       throw 'Could not launch $url';
                                     }
                                   },
-                                  child: const Text(
-                                    'Cover Note',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 17.0,
-                                      fontWeight: FontWeight.bold,
+                                  child: Align(
+                                    alignment: Alignment(0.6, 0),
+                                    child: const Text(
+                                      'Cover Note',
+                                      style: TextStyle(
+                                        color: Color.fromARGB(255, 0, 0, 0),
+                                        fontSize: 17.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -249,23 +244,15 @@ class _LoginPageState extends State<LoginPage> {
                             child: Padding(
                               padding: const EdgeInsets.only(right: 16.0),
                               child: Container(
-                                width: 250,
+                                width: 200,
                                 height: 50,
                                 padding: const EdgeInsets.all(
                                     5), // Inner spacing for border effect
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(
-                                      255, 26, 11, 158), // Background color
-                                  borderRadius: BorderRadius.circular(
-                                      15), // Same as button
-                                  border: Border.all(
-                                      color: Colors.yellow,
-                                      width: 3), // Yellow border
-                                ),
+
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        Colors.white, // Button color
+                                    backgroundColor: const Color.fromARGB(
+                                        255, 40, 37, 218), // Button color
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(
                                           12), // Slightly smaller than container
@@ -280,12 +267,15 @@ class _LoginPageState extends State<LoginPage> {
                                       ),
                                     );
                                   },
-                                  child: const Text(
-                                    'Staff Login',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 17.0,
-                                      fontWeight: FontWeight.bold,
+                                  child: Align(
+                                    alignment: Alignment(0.6, 0),
+                                    child: const Text(
+                                      'Staff Login',
+                                      style: TextStyle(
+                                        color: Color.fromARGB(255, 0, 0, 0),
+                                        fontSize: 17.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),

@@ -51,6 +51,11 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
     'Right Front\nCorner',
     'Right Back\nCorner',
     'Wind Screen\nLabel',
+    'Proposal Form Front',
+    'Proposal From Back',
+    'Valuation Report Front',
+    'Valuation Report Back',
+    'Inspection Report',
   ];
 
   bool _isLoading = false;
@@ -72,9 +77,11 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
   //   print('Received Policy Type: ${widget.policyType}');
   // }
 
+  bool get anyImageCaptured =>
+      _capturedPhotos.values.any((file) => file != null);
+
   bool get allImagesCaptured =>
-      _capturedPhotos.values.every((file) => file != null) &&
-      _buttonColors.values.every((color) => color != Colors.red);
+      _capturedPhotos.values.every((file) => file != null);
 
   @override
   Widget build(BuildContext context) {
@@ -139,50 +146,69 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                             [
                               'Front Photo',
                               'Left side\nPhoto',
+                              'Left Front\nCorner',
+                              'Left Back\nCorner',
+                              'Meter Reader',
                               'Front NIC Photo',
                               'License Photo',
                               'Deletion Letter',
-                              'Meter Reader',
-                              'Left Front\nCorner',
-                              'Left Back\nCorner',
+                              'Proposal Form Front',
+                              'Valuation Report Front',
                             ],
                             [
                               () => _openCamera('Front Photo'),
                               () => _openCamera('Left side\nPhoto'),
+                              () => _openCamera('Left Front\nCorner'),
+                              () => _openCamera('Left Back\nCorner'),
+                              () => _openCamera('Meter Reader'),
                               () => _openCamera('Front NIC Photo'),
                               () => _openCamera('License Photo'),
                               () => _openCamera('Deletion Letter'),
-                              () => _openCamera('Meter Reader'),
-                              () => _openCamera('Left Front\nCorner'),
-                              () => _openCamera('Left Back\nCorner'),
+                              () => _openCamera('Proposal Form Front'),
+                              () => _openCamera('Valuation Report Front'),
                             ],
                           ),
                           _buildColumnWithButtons(
                             [
                               'Back Photo',
                               'Right side\nPhoto',
-                              'Back NIC Photo',
-                              'Vehicle Book\nPhoto',
-                              'Chassi Number',
                               'Right Front\nCorner',
                               'Right Back\nCorner',
+                              'Chassi Number',
                               'Wind Screen\nLabel',
+                              'Back NIC Photo',
+                              'Vehicle Book\nPhoto',
+                              'Proposal Form Back',
+                              'Valuation Report Back',
                             ],
                             [
                               () => _openCamera('Back Photo'),
                               () => _openCamera('Right side\nPhoto'),
-                              () => _openCamera('Back NIC Photo'),
-                              () => _openCamera('Vehicle Book\nPhoto'),
-                              () => _openCamera('Chassi Number'),
                               () => _openCamera('Right Front\nCorner'),
                               () => _openCamera('Right Back\nCorner'),
+                              () => _openCamera('Chassi Number'),
                               () => _openCamera('Wind Screen\nLabel'),
+                              () => _openCamera('Back NIC Photo'),
+                              () => _openCamera('Vehicle Book\nPhoto'),
+                              () => _openCamera('Proposal Form Back'),
+                              () => _openCamera('Valuation Report Back'),
                             ],
                           ),
                         ],
                       ),
                     ),
                     SizedBox(height: 40),
+                    Positioned(
+                      bottom: 80,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: _buildElevatedButton(
+                          'Inspection Report',
+                          () => _openCamera('Inspection Report'),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -192,11 +218,13 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                 right: 0,
                 child: Center(
                   child: ElevatedButton(
-                    onPressed: allImagesCaptured ? _sendImages : null,
+                    onPressed:
+                        _capturedPhotos.values.any((file) => file != null)
+                            ? _sendImages
+                            : null,
                     style: ElevatedButton.styleFrom(
                       fixedSize: Size(200, 50),
-                      backgroundColor:
-                          allImagesCaptured ? Colors.green : Colors.grey,
+                      backgroundColor: Colors.green,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -259,6 +287,11 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
       'Right Back\nCorner': 'assets/Right Back.png',
       'Right Front\nCorner': 'assets/Right Front.png',
       'Left Front\nCorner': 'assets/Left Front.png',
+      'Proposal Form Front': 'assets/Formback.png',
+      'Proposal Form Back': 'assets/Formfront.png',
+      'Valuation Report Front': 'assets/Valuationreport.png',
+      'Valuation Report Back': 'assets/Valuationreport.png',
+      'Inspection Report': 'assets/Inspectionreport.png',
     };
 
     return ElevatedButton(

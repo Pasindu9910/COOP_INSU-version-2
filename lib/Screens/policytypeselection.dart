@@ -1,8 +1,74 @@
+import 'dart:convert';
 import 'package:customer_portal/Screens/policysearch.dart';
+import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-class PolicyTypeSelectionPage extends StatelessWidget {
+class PolicyTypeSelectionPage extends StatefulWidget {
   const PolicyTypeSelectionPage({super.key});
+
+  @override
+  State<PolicyTypeSelectionPage> createState() =>
+      _PolicyTypeSelectionPageState();
+}
+
+class _PolicyTypeSelectionPageState extends State<PolicyTypeSelectionPage> {
+  String? userName;
+  String? userCode;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserName();
+  }
+
+  Future<void> fetchUserName() async {
+    String? sfccode = GlobalData.getLogUser();
+    if (sfccode == null || sfccode.isEmpty) {
+      setState(() {
+        userName = "Unknown User";
+        userCode = "";
+        isLoading = false;
+      });
+      return;
+    }
+
+    final apiUrl = 'http://124.43.209.68:9000/api2/v1/getSfcStatus/$sfccode';
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = jsonDecode(response.body);
+        if (data.isNotEmpty) {
+          setState(() {
+            userName = data[0]['sfc_first_name'];
+            userCode = sfccode;
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            userName = "User Not Found";
+            userCode = "";
+            isLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          userName = "Error Fetching User";
+          userCode = "";
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        userName = "Network Error";
+        userCode = "";
+        isLoading = false;
+      });
+    }
+  }
 
   void _onTileTap(BuildContext context, String policyType) {
     Navigator.push(
@@ -28,7 +94,7 @@ class PolicyTypeSelectionPage extends StatelessWidget {
           backgroundColor: Colors.transparent,
           elevation: 0,
           title: const Text(
-            'Policy type selection',
+            'Policy Type Selection',
             style: TextStyle(
               fontSize: 25,
               fontWeight: FontWeight.bold,
@@ -41,6 +107,17 @@ class PolicyTypeSelectionPage extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              isLoading
+                  ? const CircularProgressIndicator()
+                  : Text(
+                      "Current User: $userName ($userCode)",
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+              const SizedBox(height: 20),
               _buildTile(
                 context,
                 imagePath: 'assets/Policy Information.png',

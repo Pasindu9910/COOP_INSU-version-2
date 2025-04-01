@@ -3,9 +3,18 @@ class GlobalData {
   static String? loggedInUserName;
   static String? oTPNumber;
   static String? nICnumber;
+  static String? loguser;
 
   static void setRiskName(String riskName) {
     selectedRiskName = riskName;
+  }
+
+  static void setLogUser(String userName) {
+    loguser = userName;
+  }
+
+  static String? getLogUser() {
+    return loguser;
   }
 
   static String? getRiskName() {
@@ -41,5 +50,6 @@ class GlobalData {
     loggedInUserName = null;
     oTPNumber = null;
     nICnumber = null;
+    loguser = null;
   }
 }

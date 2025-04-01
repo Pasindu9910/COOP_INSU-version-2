@@ -1,9 +1,73 @@
-// ignore: file_names
-import 'package:customer_portal/Screens/policytypeselection.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:customer_portal/Screens/policytypeselection.dart';
+import 'package:customer_portal/global_data.dart';
 
-class TaskMenu extends StatelessWidget {
+class TaskMenu extends StatefulWidget {
   const TaskMenu({super.key});
+
+  @override
+  State<TaskMenu> createState() => _TaskMenuState();
+}
+
+class _TaskMenuState extends State<TaskMenu> {
+  String? userName;
+  String? userCode;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserName();
+  }
+
+  Future<void> fetchUserName() async {
+    String? sfccode = GlobalData.getLogUser();
+    if (sfccode == null || sfccode.isEmpty) {
+      setState(() {
+        userName = "Unknown User";
+        userCode = sfccode;
+        isLoading = false;
+      });
+      return;
+    }
+
+    final apiUrl = 'http://124.43.209.68:9000/api2/v1/getSfcStatus/$sfccode';
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = jsonDecode(response.body);
+        if (data.isNotEmpty) {
+          setState(() {
+            userName = data[0]['sfc_first_name'];
+            userCode = sfccode;
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            userName = "User Not Found";
+            userCode = "";
+            isLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          userName = "Error Fetching User";
+          userCode = "";
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        userName = "Network Error";
+        userCode = "";
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,49 +93,40 @@ class TaskMenu extends StatelessWidget {
           ),
           centerTitle: true,
         ),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildTile(
-                context,
-                imagePath: 'assets/License.png',
-                label: 'Underwriting',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const PolicyTypeSelectionPage()),
-                  );
-                },
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 10), // Space after the app bar
+            isLoading
+                ? const CircularProgressIndicator()
+                : Text(
+                    "Current User: $userName ($userCode)",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+            const SizedBox(
+                height: 20), // Space between user name and menu items
+            Expanded(
+              child: Center(
+                child: _buildTile(
+                  context,
+                  imagePath: 'assets/License.png',
+                  label: 'Underwriting',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PolicyTypeSelectionPage(),
+                      ),
+                    );
+                  },
+                ),
               ),
-              // const SizedBox(height: 20), // Space between tiles
-              // _buildTile(
-              //   context,
-              //   icon: Icons.people,
-              //   label: 'Staff',
-              //   onTap: () {
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(builder: (context) => const StaffPage()),
-              //     );
-              //   },
-              // ),
-              // const SizedBox(height: 20),
-              // _buildTile(
-              //   context,
-              //   icon: Icons.settings,
-              //   label: 'Settings',
-              //   onTap: () {
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(
-              //           builder: (context) => const SettingsPage()),
-              //     );
-              //   },
-              // ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -121,40 +176,3 @@ class TaskMenu extends StatelessWidget {
     );
   }
 }
-
-// // Placeholder pages for navigation
-// class TaskPage extends StatelessWidget {
-//   const TaskPage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text('Tasks')),
-//       body: const Center(child: Text('Tasks Page')),
-//     );
-//   }
-// }
-
-// class StaffPage extends StatelessWidget {
-//   const StaffPage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text('Staff')),
-//       body: const Center(child: Text('Staff Page')),
-//     );
-//   }
-// }
-
-// class SettingsPage extends StatelessWidget {
-//   const SettingsPage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text('Settings')),
-//       body: const Center(child: Text('Settings Page')),
-//     );
-//   }
-// }

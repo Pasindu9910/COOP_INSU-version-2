@@ -172,6 +172,7 @@ class _PolicySearchPageState extends State<PolicySearchPage> {
 
   Widget _buildPolicyCard(Map<String, dynamic> policyData) {
     return Container(
+      constraints: const BoxConstraints(minHeight: 100),
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       padding: const EdgeInsets.all(4.0),
       decoration: BoxDecoration(
@@ -186,15 +187,15 @@ class _PolicySearchPageState extends State<PolicySearchPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildPolicyTile(
-                  'Customer Name', policyData['CUS_INDV_SURNAME']?.toString()),
-              _buildPolicyTile('Customer Identity Card Number',
-                  policyData['CUS_INDV_NIC_NO']?.toString()),
+                  'Your Name', policyData['CUS_INDV_SURNAME']?.toString()),
+              _buildPolicyTile(
+                  'Your NIC', policyData['CUS_INDV_NIC_NO']?.toString()),
               _buildPolicyTile(
                   'Vehicle Number', policyData['PRS_NAME']?.toString()),
               _buildPolicyTile(
                   'Policy Number', policyData['POL_POLICY_NO']?.toString()),
-              _buildPolicyTile('Policy Proposal Number',
-                  policyData['POL_PROPOSAL_NO']?.toString()),
+              _buildPolicyTile(
+                  'Proposal Number', policyData['POL_PROPOSAL_NO']?.toString()),
               _buildPolicyTile(
                   'Branch Number', policyData['BRANCH_NAME']?.toString()),
             ],
