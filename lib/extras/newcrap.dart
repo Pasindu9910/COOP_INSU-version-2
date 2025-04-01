@@ -2,30 +2,22 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
 
-class Policyinfo extends StatefulWidget {
-  final String nicNumber;
-
-  const Policyinfo({super.key, required this.nicNumber});
+class PolicySearchPage extends StatefulWidget {
+  const PolicySearchPage({super.key});
 
   @override
-  State<Policyinfo> createState() => _PolicyinfoState();
+  State<PolicySearchPage> createState() => _PolicySearchPageState();
 }
 
-class _PolicyinfoState extends State<Policyinfo> {
-  final TextEditingController _searchController = TextEditingController();
+class _PolicySearchPageState extends State<PolicySearchPage> {
   List<Map<String, dynamic>> _policyList = [];
   List<Map<String, dynamic>> _filteredPolicyList = [];
-  late FlutterLocalNotificationsPlugin _notificationsPlugin;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _initializeNotifications();
-    _fetchPolicyInfo().then((_) => _checkAndScheduleNotifications());
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -36,77 +28,12 @@ class _PolicyinfoState extends State<Policyinfo> {
     super.dispose();
   }
 
-  Future<void> _initializeNotifications() async {
-    tz.initializeTimeZones();
-    _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  Future<void> _fetchPolicyInfo(String nicNumber) async {
+    if (nicNumber.length < 5) return; // Avoid unnecessary API calls
 
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    const InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
-
-    await _notificationsPlugin.initialize(initializationSettings);
-  }
-
-  Future<void> _scheduleNotification(
-      String policyNumber, String message, DateTime scheduledDate) async {
-    await _notificationsPlugin.zonedSchedule(
-      policyNumber.hashCode,
-      'Policy Expiry Reminder',
-      message,
-      tz.TZDateTime.from(scheduledDate, tz.local),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'policy_reminder_channel',
-          'Policy Reminders',
-          channelDescription: 'Notifications for policy expiry reminders',
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.wallClockTime,
-    );
-  }
-
-  Future<void> _checkAndScheduleNotifications() async {
-    for (var policy in _policyList) {
-      final String? periodTo = policy['POL_PERIOD_TO']?.toString();
-      if (periodTo != null) {
-        final DateTime expiryDate = DateTime.parse(periodTo);
-        final DateTime now = DateTime.now();
-
-        // Check for reminders within a month
-        final DateTime oneMonthBefore =
-            expiryDate.subtract(const Duration(days: 30));
-        if (oneMonthBefore.isAfter(now)) {
-          await _scheduleNotification(
-            policy['POL_POLICY_NO']?.toString() ?? '',
-            'Your policy ${policy['POL_POLICY_NO']} will expire in a month.',
-            oneMonthBefore,
-          );
-        }
-
-        // Check for reminders within a week
-        final DateTime oneWeekBefore =
-            expiryDate.subtract(const Duration(days: 7));
-        if (oneWeekBefore.isAfter(now)) {
-          await _scheduleNotification(
-            policy['POL_POLICY_NO']?.toString() ?? '',
-            'Your policy ${policy['POL_POLICY_NO']} will expire in a week.',
-            oneWeekBefore,
-          );
-        }
-      }
-    }
-  }
-
-  Future<void> _fetchPolicyInfo() async {
     try {
-      final Uri apiUrl = Uri.parse(
-          'http://124.43.209.68:9000/api/v1/policies/${widget.nicNumber}');
+      final Uri apiUrl =
+          Uri.parse('http://124.43.209.68:9000/api/v1/policies/$nicNumber');
       final response = await http.get(apiUrl);
 
       if (response.statusCode == 200) {
@@ -117,8 +44,10 @@ class _PolicyinfoState extends State<Policyinfo> {
           _filteredPolicyList = _policyList;
         });
       } else {
-        throw Exception(
-            'Failed to load policy info, status code: ${response.statusCode}');
+        setState(() {
+          _policyList = [];
+          _filteredPolicyList = [];
+        });
       }
     } catch (e) {
       setState(() {
@@ -129,14 +58,10 @@ class _PolicyinfoState extends State<Policyinfo> {
   }
 
   void _onSearchChanged() {
-    String query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredPolicyList = _policyList.where((policy) {
-        String vehicleNumber =
-            policy['PRS_NAME']?.toString().toLowerCase() ?? '';
-        return vehicleNumber.contains(query);
-      }).toList();
-    });
+    String query = _searchController.text.trim();
+    if (query.length >= 5) {
+      _fetchPolicyInfo(query);
+    }
   }
 
   String _formatDate(String? dateString) {
@@ -158,7 +83,7 @@ class _PolicyinfoState extends State<Policyinfo> {
         appBar: AppBar(
           backgroundColor: Color.fromARGB(255, 0, 68, 124),
           title: Text(
-            'Policy Information',
+            'Policy Search',
             style: TextStyle(
               color: Colors.white,
               fontFamily: 'Georgia',
@@ -216,7 +141,7 @@ class _PolicyinfoState extends State<Policyinfo> {
           controller: _searchController,
           decoration: InputDecoration(
             prefixIcon: Icon(Icons.search, color: Colors.grey),
-            hintText: 'Search by Vehicle Number',
+            hintText: 'Enter NIC Number',
             hintStyle: TextStyle(color: Colors.grey),
             border: InputBorder.none,
           ),

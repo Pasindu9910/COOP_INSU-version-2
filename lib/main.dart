@@ -60,7 +60,12 @@ class MyApp extends StatelessWidget {
                 builder: (context) => const VehicleDetails());
           case '/NewInspection':
             return MaterialPageRoute(
-                builder: (context) => const newvehicleInspec());
+                builder: (context) => const newvehicleInspec(
+                      policyNumber: '',
+                      vehicleNumber: '',
+                      branchNumber: '',
+                      policyType: '',
+                    ));
           case '/Inspection':
             return MaterialPageRoute(
                 builder: (context) => const VehicleInspec());

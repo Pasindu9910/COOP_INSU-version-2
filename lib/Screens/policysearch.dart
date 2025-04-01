@@ -1,184 +1,228 @@
+import 'dart:convert';
 import 'package:customer_portal/Screens/newInspection.dart';
 import 'package:flutter/material.dart';
-import 'dart:async'; // For simulating API delay
+import 'package:http/http.dart' as http;
 
 class PolicySearchPage extends StatefulWidget {
-  const PolicySearchPage({super.key});
+  final String policyType;
+
+  const PolicySearchPage({super.key, required this.policyType});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _PolicySearchPageState createState() => _PolicySearchPageState();
+  State<PolicySearchPage> createState() => _PolicySearchPageState();
 }
 
 class _PolicySearchPageState extends State<PolicySearchPage> {
+  List<Map<String, dynamic>> _policyList = [];
+  List<Map<String, dynamic>> _filteredPolicyList = [];
   final TextEditingController _searchController = TextEditingController();
-  Map<String, String>? _policyData; // To store search results
-  bool _isLoading = false;
 
-  // Simulated API call
-  Future<void> _searchPolicy(String policyNumber) async {
-    setState(() {
-      _isLoading = true;
-      _policyData = null;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
 
-    // Simulating API delay
-    await Future.delayed(const Duration(seconds: 2));
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
 
-    // Dummy data (Replace with real API response)
-    if (policyNumber == "12345") {
+  Future<void> _fetchPolicyInfo(String nicNumber) async {
+    if (nicNumber.length < 5) return; // Avoid unnecessary API calls
+
+    try {
+      final Uri apiUrl =
+          Uri.parse('http://124.43.209.68:9000/api/v1/policies/$nicNumber');
+      final response = await http.get(apiUrl);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonResponse = jsonDecode(response.body);
+        setState(() {
+          _policyList =
+              jsonResponse.map((item) => item as Map<String, dynamic>).toList();
+          _filteredPolicyList = _policyList;
+        });
+      } else {
+        setState(() {
+          _policyList = [];
+          _filteredPolicyList = [];
+        });
+      }
+    } catch (e) {
       setState(() {
-        _policyData = {
-          "customerName": "John Doe",
-          "customerNIC": "987654321V",
-          "vehicleNo": "ABC-1234",
-        };
-      });
-    } else {
-      setState(() {
-        _policyData = null;
+        _policyList = [];
+        _filteredPolicyList = [];
       });
     }
+  }
 
-    setState(() {
-      _isLoading = false;
-    });
+  void _onSearchChanged() {
+    String query = _searchController.text.trim();
+    if (query.length >= 5) {
+      _fetchPolicyInfo(query);
+    }
+  }
+
+  void _navigateToVehicleInspection(Map<String, dynamic> policyData) {
+    String? policyNumber = policyData['POL_POLICY_NO']?.toString();
+    String? proposalNumber = policyData['POL_PROPOSAL_NO']?.toString();
+    String? branchNumber = policyData['BRANCH_NAME']?.toString();
+    String? vehicleNumber = policyData['PRS_NAME']?.toString();
+
+    String selectedNumber = policyNumber?.isNotEmpty == true
+        ? policyNumber!
+        : (proposalNumber ?? 'N/A');
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => newvehicleInspec(
+          policyType: widget.policyType,
+          policyNumber: selectedNumber,
+          branchNumber: branchNumber ?? 'N/A',
+          vehicleNumber: vehicleNumber ?? 'N/A',
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/background2.png'), // Same as login page
-          fit: BoxFit.cover,
-        ),
-      ),
+    return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.transparent,
         appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          title: const Text(
-            'Policy Search',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          backgroundColor: const Color.fromARGB(255, 0, 68, 124),
+          title: Text(
+            'Policy Search - ${widget.policyType}',
+            style: const TextStyle(
+              color: Colors.white,
+              fontFamily: 'Georgia',
+            ),
           ),
-          centerTitle: true,
+          iconTheme: const IconThemeData(color: Colors.white),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(60.0),
+            child: _buildSearchBar(),
+          ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              _buildSearchBar(),
-              const SizedBox(height: 20),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : _policyData != null
-                      ? _buildPolicyTile(context)
-                      : const Text(
-                          "Enter a valid policy number to search",
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              'assets/background2.png',
+              fit: BoxFit.cover,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _policyList.isEmpty
+                  ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : _filteredPolicyList.isEmpty
+                      ? const Center(
+                          child: Text('No policy information found.'))
+                      : ListView.builder(
+                          itemCount: _filteredPolicyList.length,
+                          itemBuilder: (context, index) {
+                            final policyData = _filteredPolicyList[index];
+                            return GestureDetector(
+                              onTap: () =>
+                                  _navigateToVehicleInspection(policyData),
+                              child: _buildPolicyCard(policyData),
+                            );
+                          },
                         ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildSearchBar() {
-    return TextField(
-      controller: _searchController,
-      decoration: InputDecoration(
-        hintText: "Enter Policy Number",
-        hintStyle: const TextStyle(color: Colors.white70),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.8),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide.none,
-        ),
-        suffixIcon: IconButton(
-          icon: const Icon(Icons.search, color: Colors.black),
-          onPressed: () {
-            if (_searchController.text.isNotEmpty) {
-              _searchPolicy(_searchController.text);
-            }
-          },
-        ),
-      ),
-      keyboardType: TextInputType.text,
-      textAlign: TextAlign.center,
-      style: const TextStyle(fontSize: 18, color: Colors.black),
-    );
-  }
-
-  Widget _buildPolicyTile(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => newvehicleInspec(),
-          ),
-        );
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(15),
-        margin: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: Colors.black, width: 3),
-          boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 5)],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _infoRow("Customer Name:", _policyData!["customerName"]!),
-            _infoRow("Customer NIC:", _policyData!["customerNIC"]!),
-            _infoRow("Vehicle No:", _policyData!["vehicleNo"]!),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _infoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Text(
-        "$label $value",
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8.0),
+          border: Border.all(
+            color: Colors.white,
+            width: 1.0,
+          ),
+        ),
+        child: TextField(
+          controller: _searchController,
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.search, color: Colors.grey),
+            hintText: 'Enter NIC Number',
+            hintStyle: TextStyle(color: Colors.grey),
+            border: InputBorder.none,
+          ),
+          style: const TextStyle(color: Colors.black),
+          cursorColor: Colors.blue,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPolicyCard(Map<String, dynamic> policyData) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.all(4.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black, width: 1.5),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(16.0),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildPolicyTile(
+                  'Customer Name', policyData['CUS_INDV_SURNAME']?.toString()),
+              _buildPolicyTile('Customer Identity Card Number',
+                  policyData['CUS_INDV_NIC_NO']?.toString()),
+              _buildPolicyTile(
+                  'Vehicle Number', policyData['PRS_NAME']?.toString()),
+              _buildPolicyTile(
+                  'Policy Number', policyData['POL_POLICY_NO']?.toString()),
+              _buildPolicyTile('Policy Proposal Number',
+                  policyData['POL_PROPOSAL_NO']?.toString()),
+              _buildPolicyTile(
+                  'Branch Number', policyData['BRANCH_NAME']?.toString()),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-// Dummy policy details page
-class PolicyDetailsPage extends StatelessWidget {
-  final Map<String, String> policyData;
-  const PolicyDetailsPage({super.key, required this.policyData});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Policy Details")),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Customer Name: ${policyData["customerName"]}",
-                style: const TextStyle(fontSize: 18)),
-            Text("Customer NIC: ${policyData["customerNIC"]}",
-                style: const TextStyle(fontSize: 18)),
-            Text("Vehicle No: ${policyData["vehicleNo"]}",
-                style: const TextStyle(fontSize: 18)),
-          ],
+Widget _buildPolicyTile(String title, String? value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4.0),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-    );
-  }
+        Text(
+          value ?? 'N/A',
+          style: const TextStyle(fontSize: 16.0),
+        ),
+      ],
+    ),
+  );
 }

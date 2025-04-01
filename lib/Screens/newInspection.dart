@@ -10,16 +10,24 @@ import 'package:http/http.dart' as http;
 
 // ignore: camel_case_types
 class newvehicleInspec extends StatefulWidget {
-  const newvehicleInspec({super.key});
+  final String policyNumber;
+  final String branchNumber;
+  final String vehicleNumber;
+  final String policyType;
 
+  const newvehicleInspec({
+    super.key,
+    required this.policyNumber,
+    required this.branchNumber,
+    required this.vehicleNumber,
+    required this.policyType,
+  });
   @override
   State<newvehicleInspec> createState() => _newvehicleInspecState();
 }
 
 // ignore: camel_case_types
 class _newvehicleInspecState extends State<newvehicleInspec> {
-  String? riskName = GlobalData.getRiskName();
-  String? nicNumber = GlobalData.getnICnumber();
   static const double buttonWidth = 150;
   static const double buttonHeight = 100;
   static const double fontSize = 14;
@@ -52,11 +60,19 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
   @override
   void initState() {
     super.initState();
+    // _printReceivedValues();
     for (var label in _allButtonLabels) {
       _buttonColors[label] = Colors.white;
       _capturedPhotos[label] = null;
     }
   }
+
+  // void _printReceivedValues() {
+  //   print('Received Policy Number: ${widget.policyNumber}');
+  //   print('Received Branch Number: ${widget.branchNumber}');
+  //   print('Received Vehicle Number: ${widget.vehicleNumber}');
+  //   print('Received Policy Type: ${widget.policyType}');
+  // }
 
   bool get allImagesCaptured =>
       _capturedPhotos.values.every((file) => file != null) &&
@@ -385,8 +401,6 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
   }
 
   Future<void> _sendImages() async {
-    String? riskName = GlobalData.getRiskName();
-
     _showProgressPopup(context);
 
     setState(() {
@@ -402,11 +416,11 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
 
         if (file != null) {
           String modifiedFileName =
-              '${buttonName.replaceAll("\n", "_")}_$riskName';
+              '${buttonName.replaceAll("\n", "_")}_${widget.policyNumber}_${widget.vehicleNumber}_${widget.branchNumber}.jpg';
 
           final request = http.MultipartRequest(
             'POST',
-            Uri.parse('http://124.43.209.68:9000/api/v1/uploadonsiteinf'),
+            Uri.parse('http://124.43.209.68:9000/api/v1/uploadunderwritting'),
           );
           request.files.add(
             await http.MultipartFile.fromPath(
@@ -416,8 +430,10 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
             ),
           );
 
-          request.fields['buttonName'] = buttonName;
-          request.fields['riskid'] = riskName ?? '';
+          request.fields['branchcode'] = widget.branchNumber;
+          request.fields['riskid'] = widget.branchNumber;
+          request.fields['jobtype'] = widget.policyType;
+          request.fields['polorprono'] = widget.policyNumber;
 
           final response = await request.send();
 

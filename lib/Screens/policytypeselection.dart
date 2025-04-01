@@ -4,6 +4,15 @@ import 'package:flutter/material.dart';
 class PolicyTypeSelectionPage extends StatelessWidget {
   const PolicyTypeSelectionPage({super.key});
 
+  void _onTileTap(BuildContext context, String policyType) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PolicySearchPage(policyType: policyType),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -36,39 +45,21 @@ class PolicyTypeSelectionPage extends StatelessWidget {
                 context,
                 icon: Icons.assignment,
                 label: 'New Policy',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const PolicySearchPage()),
-                  );
-                },
+                onTap: () => _onTileTap(context, 'New Policy'),
               ),
               const SizedBox(height: 20),
               _buildTile(
                 context,
                 icon: Icons.people,
                 label: 'Renewal',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const PolicySearchPage()),
-                  );
-                },
+                onTap: () => _onTileTap(context, 'Renewal'),
               ),
               const SizedBox(height: 20),
               _buildTile(
                 context,
                 icon: Icons.settings,
-                label: 'Policy cancellation',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const PolicySearchPage()),
-                  );
-                },
+                label: 'Policy Cancellation',
+                onTap: () => _onTileTap(context, 'Policy Cancellation'),
               ),
             ],
           ),
