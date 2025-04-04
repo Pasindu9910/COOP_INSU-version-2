@@ -1,12 +1,9 @@
-// ignore_for_file: use_build_context_synchronously, prefer_const_literals_to_create_immutables
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
-// ignore: camel_case_types
 class newvehicleInspec extends StatefulWidget {
   final String policyNumber;
   final String branchNumber;
@@ -24,7 +21,6 @@ class newvehicleInspec extends StatefulWidget {
   State<newvehicleInspec> createState() => _newvehicleInspecState();
 }
 
-// ignore: camel_case_types
 class _newvehicleInspecState extends State<newvehicleInspec> {
   static const double buttonWidth = 150;
   static const double buttonHeight = 100;
@@ -32,7 +28,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
   static const double spacing = 30;
 
   final ImagePicker _picker = ImagePicker();
-  final Map<String, File?> _capturedPhotos = {};
+  final Map<String, List<File>> _capturedPhotos = {};
   final Map<String, Color> _buttonColors = {};
   final List<String> _allButtonLabels = [
     'Front Photo',
@@ -66,7 +62,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
 
     for (var label in _allButtonLabels) {
       _buttonColors[label] = Colors.white;
-      _capturedPhotos[label] = null;
+      _capturedPhotos[label] = [];
     }
   }
 
@@ -74,13 +70,13 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
       _buttonColors.values.every((color) => color != Colors.red);
 
   bool get isAtLeastOnePhotoTaken =>
-      _capturedPhotos.values.any((photo) => photo != null);
+      _capturedPhotos.values.any((photos) => photos.isNotEmpty);
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/background2.png'),
             fit: BoxFit.cover,
@@ -91,17 +87,17 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
           appBar: AppBar(
             elevation: 0,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            title: Text(
+            title: const Text(
               'Vehicle Inspection',
               style: TextStyle(
                 color: Colors.white,
                 fontFamily: 'Georgia',
               ),
             ),
-            backgroundColor: Color.fromARGB(255, 0, 68, 124),
+            backgroundColor: const Color.fromARGB(255, 0, 68, 124),
           ),
           body: Stack(
             children: [
@@ -109,8 +105,8 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                 padding: const EdgeInsets.only(bottom: 80.0),
                 child: Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 30.0),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 30.0),
                       child: Text(
                         'Register Your Vehicle',
                         style: TextStyle(
@@ -119,7 +115,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                               blurRadius: 5.0,
                               color: Colors.black,
                               offset: Offset(2, 2),
-                            ),
+                            )
                           ],
                           color: Colors.white,
                           fontSize: 24,
@@ -129,7 +125,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.only(top: 20),
                       child: Row(
@@ -194,7 +190,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -206,14 +202,14 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                   child: ElevatedButton(
                     onPressed: isAtLeastOnePhotoTaken ? _sendImages : null,
                     style: ElevatedButton.styleFrom(
-                      fixedSize: Size(200, 50),
+                      fixedSize: const Size(200, 50),
                       backgroundColor:
                           isAtLeastOnePhotoTaken ? Colors.green : Colors.grey,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Send',
                       style: TextStyle(
                         fontSize: 18,
@@ -226,7 +222,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                 ),
               ),
               if (_isLoading)
-                Center(
+                const Center(
                   child: CircularProgressIndicator(),
                 ),
             ],
@@ -244,7 +240,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
         _buildElevatedButton(buttonTexts[i], onPressedFunctions[i]),
       );
       if (i < buttonTexts.length - 1) {
-        buttonsWithSpacing.add(SizedBox(height: spacing));
+        buttonsWithSpacing.add(const SizedBox(height: spacing));
       }
     }
 
@@ -281,14 +277,14 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
 
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        fixedSize: Size(buttonWidth, buttonHeight),
+        fixedSize: const Size(buttonWidth, buttonHeight),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
-          side: BorderSide(width: 3, color: Colors.black),
+          side: const BorderSide(width: 3, color: Colors.black),
         ),
         backgroundColor: _buttonColors[text] ?? Colors.white,
         elevation: 10,
-        shadowColor: Color.fromARGB(255, 0, 0, 0),
+        shadowColor: const Color.fromARGB(255, 0, 0, 0),
       ),
       onPressed: onPressed,
       child: Column(
@@ -300,10 +296,10 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
               height: 40,
               fit: BoxFit.cover,
             ),
-          SizedBox(height: 3),
+          const SizedBox(height: 3),
           Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: fontSize,
               color: Colors.black,
               fontFamily: 'Georgia',
@@ -316,45 +312,51 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
   }
 
   Future<void> _openCamera(String buttonText) async {
-    if (_capturedPhotos[buttonText] != null) {
+    await _captureNewImage(buttonText);
+
+    if (_capturedPhotos[buttonText]!.isNotEmpty) {
       await showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Image Preview'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.file(
-                  _capturedPhotos[buttonText]!,
-                  height: 200,
-                  width: 200,
-                  fit: BoxFit.cover,
+            title: const Text('Image Preview'),
+            content: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.5,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _capturedPhotos[buttonText]!.map((file) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Image.file(
+                        file,
+                        fit: BoxFit.contain,
+                      ),
+                    );
+                  }).toList(),
                 ),
-                SizedBox(height: 10),
-                Text('Do you want to retake this photo?'),
-              ],
+              ),
             ),
             actions: <Widget>[
               TextButton(
-                child: Text('Use this photo'),
+                child: const Text('Done'),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
               TextButton(
-                child: Text('Retake'),
-                onPressed: () async {
+                child: const Text('Capture Another'),
+                onPressed: () {
                   Navigator.of(context).pop();
-                  await _captureNewImage(buttonText);
+                  _openCamera(buttonText);
                 },
               ),
             ],
           );
         },
       );
-    } else {
-      await _captureNewImage(buttonText);
     }
   }
 
@@ -366,7 +368,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
         File imageFile = File(pickedFile.path);
         setState(() {
           _buttonColors[buttonText] = Colors.green;
-          _capturedPhotos[buttonText] = imageFile;
+          _capturedPhotos[buttonText]!.add(imageFile);
         });
       }
     } finally {
@@ -381,11 +383,11 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Error"),
+          title: const Text("Error"),
           content: Text(message),
           actions: [
             TextButton(
-              child: Text("OK"),
+              child: const Text("OK"),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -401,12 +403,13 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Success"),
-          content: Text("Images sent successfully!"),
+          title: const Text("Success"),
+          content: const Text("Images sent successfully!"),
           actions: [
             TextButton(
-              child: Text("OK"),
+              child: const Text("OK"),
               onPressed: () {
+                Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
             ),
@@ -428,9 +431,9 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
     try {
       for (var entry in _capturedPhotos.entries) {
         final buttonName = entry.key;
-        final file = entry.value;
+        final images = entry.value;
 
-        if (file != null) {
+        for (var file in images) {
           String modifiedFileName =
               '${buttonName.replaceAll("\n", "_")}_${widget.policyNumber}.jpg';
 
@@ -438,6 +441,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
             'POST',
             Uri.parse('http://124.43.209.68:9000/api/v1/uploadunderwritting'),
           );
+
           request.files.add(
             await http.MultipartFile.fromPath(
               'files',
@@ -453,8 +457,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
 
           final response = await request.send();
 
-          if (response.statusCode == 200) {
-          } else {
+          if (response.statusCode != 200) {
             failedUploads.add(buttonName);
           }
         }
@@ -482,31 +485,32 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
     setState(() {
       for (var label in _allButtonLabels) {
         _buttonColors[label] = Colors.white;
-        _capturedPhotos[label] = null;
+        _capturedPhotos[label] = [];
       }
     });
   }
-}
 
-void _showProgressPopup(BuildContext context) {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              CircularProgressIndicator(),
-              SizedBox(width: 20),
-              Text('Uploading images...'),
-            ],
+  void _showProgressPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: const Padding(
+            padding: EdgeInsets.all(20),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 20),
+                Text('Uploading images...'),
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
+        );
+      },
+    );
+  }
 }
