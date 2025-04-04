@@ -63,19 +63,12 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
   @override
   void initState() {
     super.initState();
-    // _printReceivedValues();
+
     for (var label in _allButtonLabels) {
       _buttonColors[label] = Colors.white;
       _capturedPhotos[label] = null;
     }
   }
-
-  // void _printReceivedValues() {
-  //   print('Received Policy Number: ${widget.policyNumber}');
-  //   print('Received Branch Number: ${widget.branchNumber}');
-  //   print('Received Vehicle Number: ${widget.vehicleNumber}');
-  //   print('Received Policy Type: ${widget.policyType}');
-  // }
 
   bool get allImagesCaptured =>
       _buttonColors.values.every((color) => color != Colors.red);
