@@ -86,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       minimumSize: const Size(100, 50),
                     ),
                     onPressed: () {
-                      Navigator.pushNamed(context, '/Login');
+                      Navigator.pushNamed(context, '/decision');
                     },
                     child: const Text(
                       'Let\'s get started',
