@@ -226,6 +226,7 @@ class _OwnervehicleState extends State<Ownervehicle> {
                                 Navigator.pushNamed(
                                   context,
                                   '/Choises',
+                                  arguments: widget.nicNumber,
                                 );
                               }
                             : null,
