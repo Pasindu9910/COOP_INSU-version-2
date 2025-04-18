@@ -23,7 +23,7 @@ class Ownervehicle extends StatefulWidget {
 
 class _OwnervehicleState extends State<Ownervehicle> {
   String? _selectedVehicleId;
-  // bool _isCarVisible = false;
+  bool _isCarVisible = false;
   bool _isVehiclesLoaded = false;
   List<Vehicle> _vehicleList = [];
 
@@ -31,11 +31,11 @@ class _OwnervehicleState extends State<Ownervehicle> {
   void initState() {
     super.initState();
 
-    // Future.delayed(Duration(milliseconds: 500), () {
-    //   setState(() {
-    //     _isCarVisible = true;
-    //   });
-    // });
+    Future.delayed(Duration(milliseconds: 500), () {
+      setState(() {
+        _isCarVisible = true;
+      });
+    });
 
     _fetchVehicles();
   }
@@ -93,8 +93,8 @@ class _OwnervehicleState extends State<Ownervehicle> {
     bool isProceedEnabled = _isVehiclesLoaded &&
         (_selectedVehicleId != null && _selectedVehicleId!.isNotEmpty);
 
-    // final screenWidth = MediaQuery.of(context).size.width;
-    // final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return SafeArea(
       child: Container(
@@ -119,24 +119,24 @@ class _OwnervehicleState extends State<Ownervehicle> {
           ),
           body: Stack(
             children: [
-              // AnimatedPositioned(
-              //   duration: Duration(seconds: 2),
-              //   curve: Curves.easeInOut,
-              //   left: _isCarVisible ? (screenWidth / 2) - 175 : screenWidth,
-              //   top: (screenHeight / 2) - 400,
-              //   child: Image.asset(
-              //     'assets/mycar.png',
-              //     height: 350,
-              //     width: 350,
-              //   ),
-              // ),
+              AnimatedPositioned(
+                duration: Duration(seconds: 2),
+                curve: Curves.easeInOut,
+                left: _isCarVisible ? (screenWidth / 2) - 175 : screenWidth,
+                top: (screenHeight / 2) - 440,
+                child: Image.asset(
+                  'assets/mycar.png',
+                  height: 350,
+                  width: 350,
+                ),
+              ),
               Center(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(height: 150),
+                      SizedBox(height: 140),
                       Padding(
                         padding: const EdgeInsets.only(top: 5.0),
                         child: Text(
@@ -202,7 +202,7 @@ class _OwnervehicleState extends State<Ownervehicle> {
                           : (_vehicleList.isEmpty
                               ? CircularProgressIndicator()
                               : Text('Loading vehicles...')),
-                      SizedBox(height: 50),
+                      SizedBox(height: 60),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
@@ -226,12 +226,38 @@ class _OwnervehicleState extends State<Ownervehicle> {
                                 Navigator.pushNamed(
                                   context,
                                   '/Choises',
-                                  arguments: widget.nicNumber,
                                 );
                               }
                             : null,
                         child: Text(
                           'Let\'s Proceed',
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                            fontFamily: 'Georgia',
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 40),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          backgroundColor: Color.fromARGB(255, 214, 176, 50),
+                          elevation: 20,
+                          shadowColor: const Color.fromARGB(255, 0, 0, 0),
+                          minimumSize: Size(double.infinity, 50),
+                        ),
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/Addnewvehicle',
+                          );
+                        },
+                        child: Text(
+                          'Add New Vehicle',
                           style: TextStyle(
                             color: const Color.fromARGB(255, 0, 0, 0),
                             fontFamily: 'Georgia',

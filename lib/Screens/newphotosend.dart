@@ -1,30 +1,22 @@
 // ignore_for_file: use_build_context_synchronously, camel_case_types
 
 import 'dart:io';
+import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-class newvehicleInspec extends StatefulWidget {
-  final String policyNumber;
-  final String branchNumber;
-  final String vehicleNumber;
-  final String policyType;
-
-  const newvehicleInspec({
+class newphotosend extends StatefulWidget {
+  const newphotosend({
     super.key,
-    required this.policyNumber,
-    required this.branchNumber,
-    required this.vehicleNumber,
-    required this.policyType,
   });
   @override
-  State<newvehicleInspec> createState() => _newvehicleInspecState();
+  State<newphotosend> createState() => _newphotosendState();
 }
 
-class _newvehicleInspecState extends State<newvehicleInspec> {
+class _newphotosendState extends State<newphotosend> {
   static const double buttonWidth = 150;
   static const double buttonHeight = 100;
   static const double fontSize = 14;
@@ -422,6 +414,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
   }
 
   Future<void> _sendImages() async {
+    String? riskName = GlobalData.getRiskName();
     _showProgressPopup(context);
 
     setState(() {
@@ -439,11 +432,11 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
           String timestamp =
               DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
           String modifiedFileName =
-              '${buttonName.replaceAll("\n", "_")}_$timestamp.jpg';
+              '${riskName}_${buttonName.replaceAll("\n", "_")}_$timestamp.jpg';
 
           final request = http.MultipartRequest(
             'POST',
-            Uri.parse('http://124.43.209.68:9000/api/v1/uploadunderwritting'),
+            Uri.parse('http://124.43.209.68:9000/api/v1/newvehiclephotos'),
           );
 
           request.files.add(
@@ -454,10 +447,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
             ),
           );
 
-          request.fields['branchcode'] = widget.branchNumber;
-          request.fields['riskid'] = widget.vehicleNumber;
-          request.fields['jobtype'] = widget.policyType;
-          request.fields['polorprono'] = widget.policyNumber;
+          request.fields['riskid'] = riskName ?? '';
 
           final response = await request.send();
 
@@ -471,6 +461,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
 
       if (failedUploads.isEmpty) {
         _showSuccessDialog();
+        GlobalData.setRiskName('');
         _resetState();
       } else {
         _showErrorDialog('Failed to send images: ${failedUploads.join(", ")}');

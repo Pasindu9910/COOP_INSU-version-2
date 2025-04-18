@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
-class VehicleDetails extends StatefulWidget {
-  const VehicleDetails({super.key});
+class Addnewvehicle extends StatefulWidget {
+  const Addnewvehicle({super.key});
 
   @override
-  State<VehicleDetails> createState() => _VehicleDetailsState();
+  State<Addnewvehicle> createState() => _AddnewvehicleState();
 }
 
-class _VehicleDetailsState extends State<VehicleDetails> {
+class _AddnewvehicleState extends State<Addnewvehicle> {
   final _formKey = GlobalKey<FormState>();
   final vehicleNameController = TextEditingController();
   final customerNameController = TextEditingController();
@@ -77,7 +77,7 @@ class _VehicleDetailsState extends State<VehicleDetails> {
             const SnackBar(
                 content: Text('Vehicle details saved successfully!')),
           );
-          Navigator.pushNamed(context, '/Addnewvehicle');
+          Navigator.pushNamed(context, '/newphotosend');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
