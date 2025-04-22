@@ -123,7 +123,7 @@ class _OwnervehicleState extends State<Ownervehicle> {
                 duration: Duration(seconds: 2),
                 curve: Curves.easeInOut,
                 left: _isCarVisible ? (screenWidth / 2) - 175 : screenWidth,
-                top: (screenHeight / 2) - 440,
+                top: (screenHeight / 2) - 450,
                 child: Image.asset(
                   'assets/mycar.png',
                   height: 350,
@@ -241,29 +241,36 @@ class _OwnervehicleState extends State<Ownervehicle> {
                         ),
                       ),
                       SizedBox(height: 40),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+                      // You can modify this value as needed
+
+                      SizedBox(
+                        height: 100,
+                        width: screenHeight,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            backgroundColor: Color.fromARGB(255, 214, 176, 50),
+                            elevation: 20,
+                            shadowColor: const Color.fromARGB(255, 0, 0, 0),
+                            minimumSize:
+                                Size(0, 50), // Width is controlled by SizedBox
                           ),
-                          backgroundColor: Color.fromARGB(255, 214, 176, 50),
-                          elevation: 20,
-                          shadowColor: const Color.fromARGB(255, 0, 0, 0),
-                          minimumSize: Size(double.infinity, 50),
-                        ),
-                        onPressed: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/Addnewvehicle',
-                          );
-                        },
-                        child: Text(
-                          'Add New Vehicle',
-                          style: TextStyle(
-                            color: const Color.fromARGB(255, 0, 0, 0),
-                            fontFamily: 'Georgia',
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/Addnewvehicle',
+                            );
+                          },
+                          child: Text(
+                            'Digital Insurance',
+                            style: TextStyle(
+                              color: const Color.fromARGB(255, 0, 0, 0),
+                              fontFamily: 'Georgia',
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),

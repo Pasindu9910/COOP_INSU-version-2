@@ -2,6 +2,7 @@ import 'package:customer_portal/Screens/accidentreport.dart';
 import 'package:customer_portal/Screens/addnewvehicle.dart';
 import 'package:customer_portal/Screens/changepassword.dart';
 import 'package:customer_portal/Screens/decision.dart';
+import 'package:customer_portal/Screens/digitalinsuarance.dart';
 import 'package:customer_portal/Screens/menu.dart';
 import 'package:customer_portal/Screens/login.dart';
 import 'package:customer_portal/Screens/accidentphotos.dart';
@@ -63,6 +64,9 @@ class MyApp extends StatelessWidget {
           case '/VehicleDetails':
             return MaterialPageRoute(
                 builder: (context) => const VehicleDetails());
+          case '/Digitalinsuarance':
+            return MaterialPageRoute(
+                builder: (context) => const Digitalinsuarance());
           case '/Addnewvehicle':
             return MaterialPageRoute(
                 builder: (context) => const Addnewvehicle());
