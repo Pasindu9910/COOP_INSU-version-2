@@ -123,7 +123,7 @@ class _OwnervehicleState extends State<Ownervehicle> {
                 duration: Duration(seconds: 2),
                 curve: Curves.easeInOut,
                 left: _isCarVisible ? (screenWidth / 2) - 175 : screenWidth,
-                top: (screenHeight / 2) - 450,
+                top: (screenHeight / 2) - 475,
                 child: Image.asset(
                   'assets/mycar.png',
                   height: 350,
@@ -241,21 +241,18 @@ class _OwnervehicleState extends State<Ownervehicle> {
                         ),
                       ),
                       SizedBox(height: 40),
-                      // You can modify this value as needed
-
                       SizedBox(
-                        height: 100,
+                        height: 150,
                         width: screenHeight,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
                             ),
-                            backgroundColor: Color.fromARGB(255, 214, 176, 50),
+                            backgroundColor: Color.fromARGB(255, 18, 42, 119),
                             elevation: 20,
                             shadowColor: const Color.fromARGB(255, 0, 0, 0),
-                            minimumSize:
-                                Size(0, 50), // Width is controlled by SizedBox
+                            minimumSize: Size(0, 50),
                           ),
                           onPressed: () {
                             Navigator.pushNamed(
@@ -263,14 +260,25 @@ class _OwnervehicleState extends State<Ownervehicle> {
                               '/Addnewvehicle',
                             );
                           },
-                          child: Text(
-                            'Digital Insurance',
-                            style: TextStyle(
-                              color: const Color.fromARGB(255, 0, 0, 0),
-                              fontFamily: 'Georgia',
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/Digital.png',
+                                height: 60,
+                              ),
+                              SizedBox(height: 5),
+                              Text(
+                                'Digital Insurance',
+                                style: TextStyle(
+                                  color:
+                                      const Color.fromARGB(255, 255, 255, 255),
+                                  fontFamily: 'Georgia',
+                                  fontSize: 19.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
