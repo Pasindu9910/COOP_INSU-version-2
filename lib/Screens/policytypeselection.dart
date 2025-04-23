@@ -135,7 +135,7 @@ class _PolicyTypeSelectionPageState extends State<PolicyTypeSelectionPage> {
               _buildTile(
                 context,
                 imagePath: 'assets/cancellation.png',
-                label: 'Policy Cancellation',
+                label: 'Reset Policy Cancellation',
                 onTap: () => _onTileTap(context, 'Policy Cancellation'),
               ),
             ],

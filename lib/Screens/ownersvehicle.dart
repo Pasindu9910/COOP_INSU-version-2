@@ -257,7 +257,7 @@ class _OwnervehicleState extends State<Ownervehicle> {
                           onPressed: () {
                             Navigator.pushNamed(
                               context,
-                              '/Addnewvehicle',
+                              '/Digimenu',
                             );
                           },
                           child: Column(
