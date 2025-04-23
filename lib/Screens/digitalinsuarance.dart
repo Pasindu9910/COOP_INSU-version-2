@@ -96,7 +96,7 @@ class _DigitalinsuaranceState extends State<Digitalinsuarance> {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 10), // Space after the app bar
+            const SizedBox(height: 10),
             isLoading
                 ? const CircularProgressIndicator()
                 : Text(
@@ -107,8 +107,7 @@ class _DigitalinsuaranceState extends State<Digitalinsuarance> {
                       color: Colors.white,
                     ),
                   ),
-            const SizedBox(
-                height: 20), // Space between user name and menu items
+            const SizedBox(height: 20),
             Expanded(
               child: Center(
                 child: _buildTile(

@@ -202,16 +202,13 @@ class _LoginPageState extends State<LoginPage> {
                               child: Container(
                                 width: 200,
                                 height: 50,
-                                padding: const EdgeInsets.all(
-                                    5), // Space between border and button
-
+                                padding: const EdgeInsets.all(5),
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color.fromARGB(
-                                        255, 66, 63, 224), // Button color
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 66, 63, 224),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          12), // Slightly smaller than container
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
                                   onPressed: () {
@@ -246,16 +243,13 @@ class _LoginPageState extends State<LoginPage> {
                               child: Container(
                                 width: 200,
                                 height: 50,
-                                padding: const EdgeInsets.all(
-                                    5), // Inner spacing for border effect
-
+                                padding: const EdgeInsets.all(5),
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color.fromARGB(
-                                        255, 45, 42, 204), // Button color
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 45, 42, 204),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          12), // Slightly smaller than container
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
                                   onPressed: () {
