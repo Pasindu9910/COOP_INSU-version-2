@@ -216,7 +216,7 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                   onPressed: () {
                                     const url =
-                                        'http://portal.ci.lk/dist/covernote/';
+                                        'https://portal.ci.lk/dist/covernote/';
                                     if (Uri.parse(url).isAbsolute) {
                                       launchUrl(Uri.parse(url));
                                     } else {

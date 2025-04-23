@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:customer_portal/Screens/changestaffpassword.dart';
 import 'package:customer_portal/Screens/digitalinsuarance.dart';
 import 'package:customer_portal/Screens/staffregistration.dart';
 import 'package:customer_portal/global_data.dart';
@@ -138,6 +139,23 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
                             ),
                           ),
                           const SizedBox(height: 20),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ChangeStaffPasswordPage()),
+                              );
+                            },
+                            child: const Text(
+                              'Forgot password? click here',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 226, 232, 38),
+                                fontSize: 17.0,
+                              ),
+                            ),
+                          ),
                           TextButton(
                             onPressed: () {
                               Navigator.push(
