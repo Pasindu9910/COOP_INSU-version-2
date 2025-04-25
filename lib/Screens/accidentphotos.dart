@@ -163,7 +163,7 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
                       ),
                     ),
                     child: Text(
-                      'Send',
+                      'Submit',
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.white,

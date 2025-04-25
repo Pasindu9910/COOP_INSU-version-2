@@ -89,6 +89,7 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
                           _buildTextField(
                             controller: _userNameController,
                             labelText: 'User Name:',
+                            hintText: 'EPF Code',
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter User Name';
@@ -148,11 +149,30 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
                                         const ChangeStaffPasswordPage()),
                               );
                             },
-                            child: const Text(
-                              'Forgot password? click here',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 226, 232, 38),
-                                fontSize: 17.0,
+                            child: RichText(
+                              text: TextSpan(
+                                style: TextStyle(
+                                  fontSize: 17.0,
+                                  color: Color.fromARGB(255, 226, 232, 38),
+                                ),
+                                children: [
+                                  const TextSpan(
+                                    text: 'Forgot password? ',
+                                    style: TextStyle(
+                                      decoration: TextDecoration.none,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: 'click here',
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: Color.fromARGB(255, 226,
+                                          232, 38), // yellow underline
+                                      decorationThickness: 1.5,
+                                      color: Color.fromARGB(255, 226, 232, 38),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -165,11 +185,30 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
                                         const StaffRegisterPage()),
                               );
                             },
-                            child: const Text(
-                              'Not registered yet? Register from here!',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 226, 232, 38),
-                                fontSize: 17.0,
+                            child: RichText(
+                              text: TextSpan(
+                                style: TextStyle(
+                                  fontSize: 17.0,
+                                  color: Color.fromARGB(255, 226, 232, 38),
+                                ),
+                                children: [
+                                  const TextSpan(
+                                    text: 'Not Registered Yet? ',
+                                    style: TextStyle(
+                                      decoration: TextDecoration.none,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: 'Register From here',
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: Color.fromARGB(255, 226,
+                                          232, 38), // yellow underline
+                                      decorationThickness: 1.5,
+                                      color: Color.fromARGB(255, 226, 232, 38),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -189,6 +228,7 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String labelText,
+    String? hintText,
     bool obscureText = false,
     String? Function(String?)? validator,
   }) {
@@ -197,7 +237,11 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
       obscureText: obscureText,
       validator: validator,
       style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-      decoration: _inputDecoration.copyWith(labelText: labelText),
+      decoration: _inputDecoration.copyWith(
+        labelText: labelText,
+        hintText: hintText,
+        hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+      ),
     );
   }
 

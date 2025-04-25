@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:customer_portal/Screens/policytypeselection.dart';
 import 'package:customer_portal/global_data.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TaskMenu extends StatefulWidget {
   const TaskMenu({super.key});
@@ -96,7 +97,7 @@ class _TaskMenuState extends State<TaskMenu> {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 10), // Space after the app bar
+            const SizedBox(height: 10),
             isLoading
                 ? const CircularProgressIndicator()
                 : Text(
@@ -107,22 +108,39 @@ class _TaskMenuState extends State<TaskMenu> {
                       color: Colors.white,
                     ),
                   ),
-            const SizedBox(
-                height: 20), // Space between user name and menu items
+            const SizedBox(height: 20),
             Expanded(
               child: Center(
-                child: _buildTile(
-                  context,
-                  imagePath: 'assets/License.png',
-                  label: 'Underwriting',
-                  onTap: () {
-                    Navigator.push(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildTile(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const PolicyTypeSelectionPage(),
-                      ),
-                    );
-                  },
+                      imagePath: 'assets/Cover Note.png',
+                      label: 'Cover Note',
+                      onTap: () {
+                        const url = 'https://portal.ci.lk/dist/covernote/';
+                        if (Uri.parse(url).isAbsolute) {
+                          launchUrl(Uri.parse(url));
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    _buildTile(
+                      context,
+                      imagePath: 'assets/License.png',
+                      label: 'Underwriting',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const PolicyTypeSelectionPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),

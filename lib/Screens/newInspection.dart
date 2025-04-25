@@ -213,7 +213,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
                       ),
                     ),
                     child: const Text(
-                      'Send',
+                      'Submit',
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.white,

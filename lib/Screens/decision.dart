@@ -1,3 +1,4 @@
+import 'package:customer_portal/Screens/stafflogin.dart';
 import 'package:flutter/material.dart';
 
 class Decision extends StatefulWidget {
@@ -31,6 +32,7 @@ class _DecisionState extends State<Decision> with TickerProviderStateMixin {
       child: Scaffold(
         body: Stack(
           children: [
+            // Background with main content
             Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
@@ -46,10 +48,11 @@ class _DecisionState extends State<Decision> with TickerProviderStateMixin {
                     Text(
                       'Are you an existing customers?',
                       style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30,
-                          fontFamily: 'Georgia',
-                          color: Color.fromARGB(255, 0, 0, 0)),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
+                        fontFamily: 'Georgia',
+                        color: Color.fromARGB(255, 0, 0, 0),
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 20),
@@ -138,6 +141,8 @@ class _DecisionState extends State<Decision> with TickerProviderStateMixin {
                 ),
               ),
             ),
+
+            // Back button
             Positioned(
               top: 10,
               left: 10,
@@ -146,6 +151,44 @@ class _DecisionState extends State<Decision> with TickerProviderStateMixin {
                 onPressed: () {
                   Navigator.pop(context);
                 },
+              ),
+            ),
+
+            // Buttons at the bottom front of background
+            Positioned(
+              bottom: 30,
+              right: -40,
+              child: Container(
+                width: 200,
+                height: 50,
+                padding: const EdgeInsets.all(5),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 66, 63, 224),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const StaffLoginPage(),
+                      ),
+                    );
+                  },
+                  child: Align(
+                    alignment: Alignment(0.6, 0),
+                    child: const Text(
+                      'Staff Login',
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0),
+                        fontSize: 17.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

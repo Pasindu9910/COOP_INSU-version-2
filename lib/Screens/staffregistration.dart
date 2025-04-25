@@ -118,14 +118,17 @@ class _StaffRegisterPageState extends State<StaffRegisterPage> {
                     const SizedBox(height: 20),
                     TextFormField(
                       controller: usernameController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Username',
-                        border: OutlineInputBorder(),
-                        labelStyle: TextStyle(color: Colors.white),
-                        focusedBorder: OutlineInputBorder(
+                        hintText: 'EPF Code',
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.6)),
+                        border: const OutlineInputBorder(),
+                        labelStyle: const TextStyle(color: Colors.white),
+                        focusedBorder: const OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.white),
                         ),
-                        enabledBorder: OutlineInputBorder(
+                        enabledBorder: const OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.white),
                         ),
                       ),

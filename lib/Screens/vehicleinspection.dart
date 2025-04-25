@@ -185,7 +185,7 @@ class _VehicleInspecState extends State<VehicleInspec> {
                       ),
                     ),
                     child: Text(
-                      'Send',
+                      'Submit',
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.white,

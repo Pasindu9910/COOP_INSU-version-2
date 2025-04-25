@@ -3,13 +3,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:customer_portal/Screens/changepassword.dart';
-import 'package:customer_portal/Screens/stafflogin.dart';
 import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:customer_portal/Screens/register.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -170,11 +168,30 @@ class _LoginPageState extends State<LoginPage> {
                                         const ChangePassword()),
                               );
                             },
-                            child: const Text(
-                              'Forgot password? click here',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 226, 232, 38),
-                                fontSize: 17.0,
+                            child: RichText(
+                              text: TextSpan(
+                                style: TextStyle(
+                                  fontSize: 17.0,
+                                  color: Color.fromARGB(255, 226, 232, 38),
+                                ),
+                                children: [
+                                  const TextSpan(
+                                    text: 'Forgot password? ',
+                                    style: TextStyle(
+                                      decoration: TextDecoration.none,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: 'click here',
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: Color.fromARGB(255, 226,
+                                          232, 38), // yellow underline
+                                      decorationThickness: 1.5,
+                                      color: Color.fromARGB(255, 226, 232, 38),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -186,93 +203,30 @@ class _LoginPageState extends State<LoginPage> {
                                     builder: (context) => const Registerpage()),
                               );
                             },
-                            child: const Text(
-                              'Not registered yet? Register from here!',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 226, 232, 38),
-                                fontSize: 17.0,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Align(
-                            alignment: Alignment(2, 0.0),
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 16.0),
-                              child: Container(
-                                width: 200,
-                                height: 50,
-                                padding: const EdgeInsets.all(5),
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        const Color.fromARGB(255, 66, 63, 224),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    const url =
-                                        'https://portal.ci.lk/dist/covernote/';
-                                    if (Uri.parse(url).isAbsolute) {
-                                      launchUrl(Uri.parse(url));
-                                    } else {
-                                      throw 'Could not launch $url';
-                                    }
-                                  },
-                                  child: Align(
-                                    alignment: Alignment(0.6, 0),
-                                    child: const Text(
-                                      'Cover Note',
-                                      style: TextStyle(
-                                        color: Color.fromARGB(255, 0, 0, 0),
-                                        fontSize: 17.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
+                            child: RichText(
+                              text: TextSpan(
+                                style: TextStyle(
+                                  fontSize: 17.0,
+                                  color: Color.fromARGB(255, 226, 232, 38),
                                 ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                          Align(
-                            alignment: Alignment(2, 0.0),
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 16.0),
-                              child: Container(
-                                width: 200,
-                                height: 50,
-                                padding: const EdgeInsets.all(5),
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        const Color.fromARGB(255, 45, 42, 204),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                children: [
+                                  const TextSpan(
+                                    text: 'Not Registered Yet? ',
+                                    style: TextStyle(
+                                      decoration: TextDecoration.none,
                                     ),
                                   ),
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const StaffLoginPage(),
-                                      ),
-                                    );
-                                  },
-                                  child: Align(
-                                    alignment: Alignment(0.6, 0),
-                                    child: const Text(
-                                      'Staff Login',
-                                      style: TextStyle(
-                                        color: Color.fromARGB(255, 0, 0, 0),
-                                        fontSize: 17.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  TextSpan(
+                                    text: 'Register From here',
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: Color.fromARGB(255, 226,
+                                          232, 38), // yellow underline
+                                      decorationThickness: 1.5,
+                                      color: Color.fromARGB(255, 226, 232, 38),
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
                             ),
                           ),

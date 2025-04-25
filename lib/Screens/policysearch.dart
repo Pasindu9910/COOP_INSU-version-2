@@ -119,7 +119,8 @@ class _PolicySearchPageState extends State<PolicySearchPage> {
               padding: const EdgeInsets.all(16.0),
               child: _policyList.isEmpty
                   ? const Center(
-                      child: CircularProgressIndicator(),
+                      child:
+                          Text('Enter NIC to search for policy information.'),
                     )
                   : _filteredPolicyList.isEmpty
                       ? const Center(

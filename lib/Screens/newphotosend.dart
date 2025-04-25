@@ -205,7 +205,7 @@ class _newphotosendState extends State<newphotosend> {
                       ),
                     ),
                     child: const Text(
-                      'Send',
+                      'Submit',
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.white,
