@@ -89,7 +89,7 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
                           _buildTextField(
                             controller: _userNameController,
                             labelText: 'User Name:',
-                            hintText: 'EPF Code',
+                            hintText: 'EPF/Code',
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter User Name';

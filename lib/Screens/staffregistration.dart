@@ -120,7 +120,7 @@ class _StaffRegisterPageState extends State<StaffRegisterPage> {
                       controller: usernameController,
                       decoration: InputDecoration(
                         labelText: 'Username',
-                        hintText: 'EPF Code',
+                        hintText: 'EPF/Code',
                         hintStyle:
                             TextStyle(color: Colors.white.withOpacity(0.6)),
                         border: const OutlineInputBorder(),
