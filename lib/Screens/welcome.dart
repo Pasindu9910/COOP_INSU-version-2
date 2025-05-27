@@ -59,23 +59,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   const SizedBox(height: 400.0),
                   Text(
-                    'Co - Operative Insurance',
-                    style: GoogleFonts.playfairDisplay(
-                      shadows: [
-                        Shadow(
-                          blurRadius: 5.0,
-                          color: const Color.fromARGB(255, 255, 255, 255),
-                          offset: Offset(2, 2),
-                        ),
-                      ],
-                      color: const Color.fromARGB(255, 0, 0, 0),
-                      fontWeight: FontWeight.bold,
-                      fontSize: fontSize,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 30.0),
-                  Text(
                     'For the people by the people',
                     style: GoogleFonts.playfairDisplay(
                       shadows: [

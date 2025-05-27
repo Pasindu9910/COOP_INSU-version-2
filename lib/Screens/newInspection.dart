@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, camel_case_types
 
 import 'dart:io';
+import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -422,6 +423,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
   }
 
   Future<void> _sendImages() async {
+    String? sfccode = GlobalData.getLogUser();
     _showProgressPopup(context);
 
     setState(() {
@@ -457,6 +459,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
           request.fields['branchcode'] = widget.branchNumber;
           request.fields['riskid'] = widget.vehicleNumber;
           request.fields['jobtype'] = widget.policyType;
+          request.fields['sfccode'] = sfccode ?? '';
           request.fields['polorprono'] = widget.policyNumber;
 
           final response = await request.send();

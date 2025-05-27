@@ -39,6 +39,39 @@ class _VehicleDetailsState extends State<VehicleDetails> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      final vehicleNumber = vehicleNumberController.text.trim();
+      final Uri checkUri = Uri.parse(
+          'http://124.43.209.68:9010/api/v2/getByVehiclenumber/$vehicleNumber');
+
+      try {
+        final checkResponse = await http.get(checkUri);
+
+        if (checkResponse.statusCode == 200) {
+          final decoded = jsonDecode(checkResponse.body);
+
+          if (decoded != null && decoded.isNotEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('This vehicle is already registered.')),
+            );
+            return;
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(
+                    'Failed to check vehicle: ${checkResponse.statusCode}')),
+          );
+          return;
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Error checking vehicle. Please try again.')),
+        );
+        return;
+      }
+
       bool consent = await _requestUserConsent();
 
       if (!consent) {
