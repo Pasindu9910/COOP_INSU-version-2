@@ -17,7 +17,7 @@ class OnsiteInspection extends StatefulWidget {
 
 class _OnsiteInspectionState extends State<OnsiteInspection> {
   String? riskName = GlobalData.getRiskName();
-  String? id = GlobalData.getnICnumber();
+
   String? oTPnumber = GlobalData.getOTPNumber();
   static const double buttonWidth = 150;
   static const double buttonHeight = 100;
@@ -360,7 +360,6 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
   Future<void> _sendImages() async {
     String? riskName = GlobalData.getRiskName();
     String? jobId = GlobalData.getOTPNumber();
-    String? id = GlobalData.getnICnumber();
 
     if (riskName == null || jobId == null) {
       _showErrorDialog('Risk Name or Job ID is missing.');
@@ -377,7 +376,7 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
     bool isUploaded = false;
 
     try {
-      await _uploadAllImages(riskName, jobId, id!).then((_) {
+      await _uploadAllImages(riskName, jobId).then((_) {
         isUploaded = true;
       });
 
@@ -389,7 +388,6 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
         _showSuccessDialog();
         GlobalData.setRiskName('');
         GlobalData.setOTPNumber('');
-        GlobalData.setnICnumber('');
         _resetState();
       } else {
         Navigator.of(context).pop();
@@ -420,8 +418,7 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
     }
   }
 
-  Future<void> _uploadAllImages(
-      String riskName, String jobId, String id) async {
+  Future<void> _uploadAllImages(String riskName, String jobId) async {
     List<String> failedUploads = [];
 
     try {
@@ -456,7 +453,6 @@ class _OnsiteInspectionState extends State<OnsiteInspection> {
           // Add additional fields to the request
           request.fields['buttonName'] = buttonName;
           request.fields['riskid'] = riskName;
-          request.fields['nic'] = id;
           request.fields['jobId'] = jobId;
 
           final response = await request.send();

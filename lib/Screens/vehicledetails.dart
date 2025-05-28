@@ -110,7 +110,7 @@ class _VehicleDetailsState extends State<VehicleDetails> {
             const SnackBar(
                 content: Text('Vehicle details saved successfully!')),
           );
-          Navigator.pushNamed(context, '/Addnewvehicle');
+          Navigator.pushNamed(context, '/newphotosend');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
