@@ -265,6 +265,7 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
         var user = data[0];
         if (user['password'] == password) {
           GlobalData.setLogUser(username);
+          _logRiskData(username);
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const Digitalinsuarance()),
@@ -284,6 +285,25 @@ class _StaffLoginPageState extends State<StaffLoginPage> {
         const SnackBar(content: Text('Error fetching user data')),
       );
     }
+  }
+}
+
+Future<void> _logRiskData(String nicSfc) async {
+  const url = 'http://124.43.209.68:9010/risklogdata/v1/savelogdata';
+  final body = jsonEncode({'nic_sfc': nicSfc});
+
+  try {
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: body,
+    );
+
+    if (response.statusCode != 200) {
+      print('Risk log failed with status: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Risk log error: $e');
   }
 }
 

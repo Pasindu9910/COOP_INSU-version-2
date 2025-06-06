@@ -1,6 +1,8 @@
 // ignore_for_file: use_build_context_synchronously, camel_case_types
 
+import 'dart:convert';
 import 'dart:io';
+import 'package:customer_portal/global_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -422,6 +424,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
   }
 
   Future<void> _sendImages() async {
+    String? sfccode = GlobalData.getLogUser();
     _showProgressPopup(context);
 
     setState(() {
@@ -457,6 +460,7 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
           request.fields['branchcode'] = widget.branchNumber;
           request.fields['riskid'] = widget.vehicleNumber;
           request.fields['jobtype'] = widget.policyType;
+          request.fields['sfccode'] = sfccode ?? '';
           request.fields['polorprono'] = widget.policyNumber;
 
           final response = await request.send();
@@ -470,8 +474,27 @@ class _newvehicleInspecState extends State<newvehicleInspec> {
       Navigator.of(context).pop();
 
       if (failedUploads.isEmpty) {
-        _showSuccessDialog();
-        _resetState();
+        try {
+          final dataResponse = await http.post(
+            Uri.parse(
+                'http://124.43.209.68:9010/imageuploaddata/v1/saveimageuploaddata'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'nic_sfc': sfccode ?? '',
+              'pol_type': widget.policyType,
+            }),
+          );
+
+          if (dataResponse.statusCode == 200) {
+            _showSuccessDialog();
+            _resetState();
+          } else {
+            _showErrorDialog(
+                'Images uploaded but failed to submit final data.');
+          }
+        } catch (e) {
+          _showErrorDialog('Images uploaded but error submitting final data.');
+        }
       } else {
         _showErrorDialog('Failed to send images: ${failedUploads.join(", ")}');
       }

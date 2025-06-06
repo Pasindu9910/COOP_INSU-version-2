@@ -323,11 +323,19 @@ class _VehicleDetailsState extends State<VehicleDetails> {
             }
           }
           if (label == 'Vehicle Number') {
-            if (!RegExp(r'^[A-Z]{1,2}\s?[A-Z]{2,3}\s?-?\s?\d{4}$')
-                .hasMatch(value)) {
-              return 'Please enter a valid vehicle number (e.g., NW CBB-1226 or CBB 1226)';
+            final patterns = [
+              RegExp(r'^[A-Z]{2} [A-Z]{2} \d{4}$'), // NW CW 2345
+              RegExp(r'^\d{2} \d{4}$'), // 23 2345
+              RegExp(r'^[A-Z]{1,2} [A-Z]{2,3}-\d{4}$'), // NW CBB-1226
+              RegExp(r'^[A-Z]{2,3} \d{4}$'), // CBB 1226
+            ];
+
+            final isValid = patterns.any((pattern) => pattern.hasMatch(value));
+            if (!isValid) {
+              return 'Invalid format. Use "NW CW 2345", "23 2345", "NW CBB-1226", or "CBB 1226"';
             }
           }
+
           if (label == 'Your Mobile Number') {
             if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
               return 'Please enter a valid mobile number (10 digits)';
